@@ -8,7 +8,7 @@
         :root { --cafe: #8D6E63; --cafe-esc: #4E342E; }
         body { font-family: 'Segoe UI', sans-serif; background: white; color: black; margin: 0; padding: 15px; }
         .logo { color: var(--cafe-esc); font-size: 24px; font-weight: bold; text-align: center; margin-bottom: 20px; }
-        .login-container { max-width: 320px; margin: 80px auto; padding: 25px; border: 1px solid #ddd; border-radius: 12px; text-align: center; }
+        .login-container { max-width: 320px; margin: 80px auto; padding: 25px; border: 1px solid #ddd; border-radius: 12px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
         input, textarea, select { width: 100%; padding: 10px; margin: 5px 0 15px 0; border: 1px solid var(--cafe); border-radius: 6px; box-sizing: border-box; font-size: 14px; display: block; }
         label { font-weight: bold; color: var(--cafe-esc); font-size: 14px; display: block; margin-top: 10px; }
         button { width: 100%; padding: 12px; background: var(--cafe); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 10px; }
@@ -37,22 +37,19 @@
 <div id="app-content">
     <div class="logo">PLANTÃO <span style="color:var(--cafe)">PSI</span></div>
     <div class="tabs">
-        <div class="tab active" onclick="switchTab('mapa')">🗺️ MAPA</div>
-        <div class="tab" onclick="switchTab('pen')">📌 PENDÊNCIAS</div>
-        <div class="tab" onclick="switchTab('alt')">🚪 ALTAS</div>
-        <div class="tab" onclick="switchTab('pas')">🖨️ PASSAGEM</div>
+        <div class="tab active" id="tab-m" onclick="switchTab('mapa')">🗺️ MAPA</div>
+        <div class="tab" id="tab-p" onclick="switchTab('pen')">📌 PENDÊNCIAS</div>
+        <div class="tab" id="tab-a" onclick="switchTab('alt')">🚪 ALTAS</div>
+        <div class="tab" id="tab-x" onclick="switchTab('pas')">🖨️ PASSAGEM</div>
     </div>
 
     <div id="aba-mapa" class="aba-view" style="display: block;">
         <select id="sel-uti" onchange="renderMapa()"></select>
         <div class="grid" id="mapa"></div>
-        
         <div id="editor" style="margin-top: 25px; border-top: 2px solid #eee; padding-top: 15px;">
             <div id="nome-topo" class="titulo-leito">LEITO</div>
-            
             <label>Nome do Paciente:</label>
             <input type="text" id="p-nome" placeholder="Digite o nome completo" oninput="atualizarNomeTopo()">
-
             <label>Marcadores Clínicos:</label>
             <div class="check-grid">
                 <label class="check-item"><input type="checkbox" id="p-vm"> VM</label>
@@ -64,111 +61,4 @@
                 <label class="check-item"><input type="checkbox" id="p-poi"> POI</label>
                 <label class="check-item"><input type="checkbox" id="p-alta"> ALTA</label>
             </div>
-
-            <label>Lista de Problemas / Diagnósticos:</label>
-            <textarea id="p-prob" rows="2"></textarea>
-
-            <label>História Médica / Evolução Clínica:</label>
-            <textarea id="p-hist" rows="4"></textarea>
-
-            <label>Exame das Funções Psíquicas:</label>
-            <textarea id="p-psiq" rows="4"></textarea>
-
-            <label>Manejo e Conduta Psicológica:</label>
-            <textarea id="p-cond" rows="4"></textarea>
-
-            <label>📌 Pendências para o Plantão:</label>
-            <div class="check-grid" id="pendencias-checks">
-                <label class="check-item"><input type="checkbox" id="pen-familia"> Falar com Família</label>
-                <label class="check-item"><input type="checkbox" id="pen-equipe"> Discutir com Equipe</label>
-                <label class="check-item"><input type="checkbox" id="pen-avaliacao"> Nova Avaliação</label>
-                <label class="check-item"><input type="checkbox" id="pen-luto"> Suporte Luto</label>
-                <label class="check-item"><input type="checkbox" id="pen-testes"> Aplicar Testes</label>
-                <label class="check-item"><input type="checkbox" id="pen-fechamento"> Fechamento Alta</label>
-            </div>
-            <textarea id="p-pend-obs" rows="2" placeholder="Outras pendências específicas..."></textarea>
-
-            <button onclick="salvar()">💾 SALVAR DADOS NO LEITO</button>
-        </div>
-    </div>
-
-    <div id="aba-pen" class="aba-view"><h3>📌 Pendências por Paciente</h3><div id="lista-pen"></div></div>
-    <div id="aba-alt" class="aba-view"><h3>🚪 Previsão de Altas</h3><div id="lista-alt"></div></div>
-    <div id="aba-pas" class="aba-view"><h3>📋 Relatório de Passagem</h3><div id="tab-pas"></div></div>
-</div>
-
-<script>
-    const unds = {
-        "UCV 1": ["1","2","3","4","5","6","7"],
-        "UCV 2": ["10","11","12","13","14","15","16","17","40","41"],
-        "UCV 3": ["18","19","20","21","22","23","24","25","26","27","28","29","30","31","32"],
-        "UCV 4": ["33","34","35","36","37","38","39"]
-    };
-
-    let db = JSON.parse(localStorage.getItem('psi_db_v3')) || {};
-    let foco = null;
-
-    function logar() {
-        if(document.getElementById('pass').value === "psi123") {
-            document.getElementById('login-screen').style.display = 'none';
-            document.getElementById('app-content').style.display = 'block';
-            const sel = document.getElementById('sel-uti');
-            sel.innerHTML = '';
-            for(let u in unds) sel.innerHTML += `<option value="${u}">${u}</option>`;
-            renderMapa();
-        } else { alert("Senha incorreta!"); }
-    }
-
-    function renderMapa() {
-        const u = document.getElementById('sel-uti').value;
-        const m = document.getElementById('mapa');
-        m.innerHTML = '';
-        unds[u].forEach(l => {
-            const p = db[l] || {n: ""};
-            let st = p.alta ? '<br><small style="color:green"><b>ALTA</b></small>' : '';
-            m.innerHTML += `<div class="card" onclick="abrir('${l}')"><b>LEITO ${l}</b><br><small>${p.n || 'Vazio'}</small>${st}</div>`;
-        });
-    }
-
-    function atualizarNomeTopo() {
-        const n = document.getElementById('p-nome').value;
-        document.getElementById('nome-topo').innerText = n ? `LEITO ${foco}: ${n.toUpperCase()}` : `LEITO ${foco}`;
-    }
-
-    function abrir(l) {
-        foco = l;
-        const p = db[l] || {n:"", prob:"", h:"", psiq:"", c:"", pendObs:"", vm:false, esp:false, del:false, iso:false, cp:false, cf:false, poi:false, alta:false, p_fam:false, p_eq:false, p_av:false, p_lu:false, p_te:false, p_fe:false};
-        document.getElementById('p-nome').value = p.n;
-        document.getElementById('p-prob').value = p.prob || "";
-        document.getElementById('p-hist').value = p.h || "";
-        document.getElementById('p-psiq').value = p.psiq || "";
-        document.getElementById('p-cond').value = p.c || "";
-        document.getElementById('p-pend-obs').value = p.pendObs || "";
-        
-        document.getElementById('p-vm').checked = p.vm;
-        document.getElementById('p-esp').checked = p.esp;
-        document.getElementById('p-del').checked = p.del;
-        document.getElementById('p-iso').checked = p.iso;
-        document.getElementById('p-cp').checked = p.cp;
-        document.getElementById('p-cf').checked = p.cf;
-        document.getElementById('p-poi').checked = p.poi;
-        document.getElementById('p-alta').checked = p.alta;
-
-        document.getElementById('pen-familia').checked = p.p_fam;
-        document.getElementById('pen-equipe').checked = p.p_eq;
-        document.getElementById('pen-avaliacao').checked = p.p_av;
-        document.getElementById('pen-luto').checked = p.p_lu;
-        document.getElementById('pen-testes').checked = p.p_te;
-        document.getElementById('pen-fechamento').checked = p.p_fe;
-
-        atualizarNomeTopo();
-        document.getElementById('editor').style.display = 'block';
-        window.scrollTo(0, document.getElementById('editor').offsetTop);
-    }
-
-    function salvar() {
-        db[foco] = {
-            n: document.getElementById('p-nome').value,
-            prob: document.getElementById('p-prob').value,
-            h: document.getElementById('p-hist').value,
-            psiq:
+            <label>Lista de Problemas
