@@ -3,93 +3,158 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Plantão PSI - Amanda Maia</title>
+    <title>Gestão PSI - Amanda Maia</title>
     <style>
         :root { --cafe: #8D6E63; --cafe-esc: #4E342E; }
-        body { font-family: 'Segoe UI', sans-serif; background: white; color: black; margin: 0; padding: 15px; }
-        .logo { color: var(--cafe-esc); font-size: 24px; font-weight: bold; text-align: center; margin-bottom: 20px; }
-        .login-container { max-width: 320px; margin: 80px auto; padding: 25px; border: 1px solid #ddd; border-radius: 12px; text-align: center; }
-        input, textarea, select { width: 100%; padding: 10px; margin: 5px 0 15px 0; border: 1px solid var(--cafe); border-radius: 6px; box-sizing: border-box; }
-        label { font-weight: bold; color: var(--cafe-esc); font-size: 14px; display: block; margin-top: 10px; }
-        button { width: 100%; padding: 12px; background: var(--cafe); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; margin-top: 15px; }
-        .card { background: #Fdf5f2; border: 1px solid #ddd; border-top: 4px solid var(--cafe); padding: 12px; border-radius: 8px; text-align: center; cursor: pointer; min-height: 85px; }
-        .check-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 10px 0; }
-        .tabs { display: flex; gap: 5px; margin-bottom: 15px; border-bottom: 2px solid #eee; overflow-x: auto; }
+        body { font-family: 'Segoe UI', sans-serif; background: #fff; color: #000; margin: 0; padding: 15px; }
+        .logo { color: var(--cafe-esc); font-size: 22px; font-weight: bold; text-align: center; margin-bottom: 20px; }
+        .login-box { max-width: 300px; margin: 100px auto; padding: 25px; border: 1px solid #ddd; border-radius: 12px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        input, textarea, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid var(--cafe); border-radius: 6px; box-sizing: border-box; font-size: 14px; }
+        label { font-weight: bold; color: var(--cafe-esc); display: block; margin-top: 10px; font-size: 13px; }
+        button { width: 100%; padding: 12px; background: var(--cafe); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; margin-top: 15px; }
+        .card { background: #Fdf5f2; border: 1px solid #ddd; border-top: 4px solid var(--cafe); padding: 10px; border-radius: 8px; text-align: center; cursor: pointer; }
+        .tab-bar { display: flex; gap: 5px; margin-bottom: 15px; border-bottom: 2px solid #eee; overflow-x: auto; }
         .tab { padding: 10px; cursor: pointer; font-weight: bold; color: var(--cafe); white-space: nowrap; }
         .tab.active { border-bottom: 3px solid var(--cafe-esc); color: var(--cafe-esc); }
         #app-content, #editor, .aba-view { display: none; }
-
-        /* ESTILO DE IMPRESSÃO: TIPO FICHA (MAIS SEGURO) */
-        .print-box { display: none; border: 2px solid black; padding: 10px; margin-bottom: 15px; page-break-inside: avoid; }
-        .print-header { display: none; font-size: 20px; font-weight: bold; text-align: center; border-bottom: 2px solid black; margin-bottom: 20px; padding-bottom: 10px; }
-        .item-print { margin-bottom: 8px; font-size: 12px; }
-        .label-print { font-weight: bold; text-decoration: underline; }
-
+        
+        /* IMPRESSÃO EM FICHA (MAIS SEGURO PARA O HOSPITAL) */
+        .print-card { display: none; border: 1.5px solid #000; padding: 10px; margin-bottom: 15px; }
+        .print-title { display: none; font-size: 18px; font-weight: bold; text-align: center; margin-bottom: 15px; border-bottom: 2px solid #000; }
+        
         @media print {
             @page { size: portrait; margin: 1cm; }
-            .tabs, #editor, select, .logo, button, label, .grid, .login-container, .card, hr { display: none !important; }
-            #app-content, #aba-pas { display: block !important; }
-            .print-header, .print-box { display: block !important; }
-            body { padding: 0; background: white; }
+            .tab-bar, #editor, select, .logo, button, label, .grid, .login-box { display: none !important; }
+            #app-content, #aba-pas, .print-card, .print-title { display: block !important; }
+            body { padding: 0; }
         }
     </style>
 </head>
 <body>
 
-<div id="login-screen" class="login-container">
+<div id="login-screen" class="login-box">
     <div class="logo">PLANTÃO <span style="color:var(--cafe)">PSI</span></div>
-    <input type="password" id="pass" placeholder="Senha: psi123">
+    <input type="password" id="pass" placeholder="Digite a senha" autocomplete="current-password">
     <button onclick="logar()">ENTRAR</button>
 </div>
 
 <div id="app-content">
     <div class="logo">PLANTÃO <span style="color:var(--cafe)">PSI</span></div>
-    <div class="tabs">
-        <div class="tab active" onclick="switchTab('mapa')">🗺️ MAPA</div>
-        <div class="tab" onclick="switchTab('bol')">📢 BOLETIM</div>
-        <div class="tab" onclick="switchTab('pen')">📌 PENDÊNCIAS</div>
-        <div class="tab" onclick="switchTab('pas')">🖨️ IMPRIMIR</div>
+    <div class="tab-bar">
+        <div class="tab active" onclick="switchTab('mapa')">MAPA</div>
+        <div class="tab" onclick="switchTab('bol')">BOLETIM</div>
+        <div class="tab" onclick="switchTab('pen')">PENDÊNCIAS</div>
+        <div class="tab" onclick="switchTab('pas')">IMPRIMIR</div>
     </div>
 
     <div id="aba-mapa" class="aba-view" style="display: block;">
         <select id="sel-uti" onchange="renderMapa()"></select>
         <div class="grid" id="mapa"></div>
-        <div id="editor" style="margin-top: 25px; border-top: 2px solid #eee; padding-top: 15px;">
-            <div id="nome-topo" style="background:var(--cafe-esc);color:white;padding:10px;border-radius:6px;font-weight:bold;">LEITO</div>
+        <div id="editor" style="margin-top: 25px; border-top: 1px solid #eee; padding-top: 15px;">
+            <div id="nome-topo" style="background:var(--cafe-esc);color:white;padding:10px;border-radius:6px;font-weight:bold;margin-bottom:10px;">LEITO</div>
             <label>Paciente:</label><input type="text" id="p-nome" oninput="atualizarNomeTopo()">
-            <div class="check-grid">
-                <label><input type="checkbox" id="p-vm"> VM</label>
-                <label><input type="checkbox" id="p-esp"> ESP</label>
-                <label><input type="checkbox" id="p-del"> DEL</label>
-                <label><input type="checkbox" id="p-iso"> ISO</label>
-                <label><input type="checkbox" id="p-cp"> CP</label>
-                <label><input type="checkbox" id="p-alta"> ALTA</label>
-            </div>
             <label>Problemas:</label><textarea id="p-prob" rows="2"></textarea>
-            <label>Evolução:</label><textarea id="p-hist" rows="4"></textarea>
-            <label>Exame Psíquico:</label><textarea id="p-psiq" rows="4"></textarea>
-            <label>Conduta:</label><textarea id="p-cond" rows="4"></textarea>
+            <label>Evolução:</label><textarea id="p-hist" rows="3"></textarea>
+            <label>Exame Psíquico:</label><textarea id="p-psiq" rows="3"></textarea>
+            <label>Conduta:</label><textarea id="p-cond" rows="3"></textarea>
             <label>Fechamento Alta:</label><textarea id="p-fech" rows="2"></textarea>
-            <label>Boletim:</label><textarea id="p-bol" rows="2"></textarea>
-            <label>Pendências:</label>
-            <div class="check-grid">
-                <label><input type="checkbox" id="pen-f"> Família</label>
-                <label><input type="checkbox" id="pen-b"> Boletim</label>
-                <label><input type="checkbox" id="pen-c"> CDI/TRC</label>
-            </div>
-            <textarea id="p-obs" rows="2" placeholder="Outras..."></textarea>
-            <button onclick="salvar()">💾 SALVAR</button>
+            <button onclick="salvar()">💾 SALVAR NO LEITO</button>
         </div>
     </div>
 
     <div id="aba-bol" class="aba-view"><h3>📢 Boletins</h3><div id="lista-bol"></div></div>
     <div id="aba-pen" class="aba-view"><h3>📌 Pendências</h3><div id="lista-pen"></div></div>
     <div id="aba-pas" class="aba-view">
-        <div id="print-h" class="print-header"></div>
-        <div id="relatorio-final"></div>
+        <div id="p-header" class="print-title"></div>
+        <div id="p-corpo"></div>
     </div>
 </div>
 
 <script>
-    const unds = { "UCV 1": ["1","2","3","4","5","6","7"], "UCV 2": ["10","11","
+    const unds = { "UCV 1": ["1","2","3","4","5","6","7"], "UCV 2": ["10","11","12","13","14","15","16","17","40","41"], "UCV 3": ["18","19","20","21","22","23","24","25","26","27","28","29","30","31","32"], "UCV 4": ["33","34","35","36","37","38","39"] };
+    
+    // BANCO DE DADOS RESETADO PARA LIMPAR ERROS
+    let db = JSON.parse(localStorage.getItem('db_psi_final_safe')) || {};
+    let foco = null;
+
+    function logar() {
+        // SENHA FIXA: psi123
+        if(document.getElementById('pass').value === "psi123") {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('app-content').style.display = 'block';
+            const sel = document.getElementById('sel-uti'); sel.innerHTML = '';
+            for(let u in unds) sel.innerHTML += `<option value="${u}">${u}</option>`;
+            renderMapa();
+        } else { alert("Senha incorreta!"); }
+    }
+
+    function renderMapa() {
+        const u = document.getElementById('sel-uti').value;
+        const m = document.getElementById('mapa'); m.innerHTML = '';
+        unds[u].forEach(l => {
+            const p = db[l] || {n: ""};
+            m.innerHTML += `<div class="card" onclick="abrir('${l}')"><b>L${l}</b><br><small>${p.n || 'Vazio'}</small></div>`;
+        });
+    }
+
+    function atualizarNomeTopo() {
+        const n = document.getElementById('p-nome').value;
+        document.getElementById('nome-topo').innerText = n ? `L${foco}: ${n.toUpperCase()}` : `L${foco}`;
+    }
+
+    function abrir(l) {
+        foco = l;
+        const p = db[l] || {n:"", prob:"", h:"", psiq:"", c:"", fech:""};
+        document.getElementById('p-nome').value = p.n; 
+        document.getElementById('p-prob').value = p.prob;
+        document.getElementById('p-hist').value = p.h; 
+        document.getElementById('p-psiq').value = p.psiq;
+        document.getElementById('p-cond').value = p.c; 
+        document.getElementById('p-fech').value = p.fech;
+        atualizarNomeTopo(); 
+        document.getElementById('editor').style.display = 'block';
+        window.scrollTo(0, document.getElementById('editor').offsetTop);
+    }
+
+    function salvar() {
+        db[foco] = {
+            n: document.getElementById('p-nome').value, 
+            prob: document.getElementById('p-prob').value,
+            h: document.getElementById('p-hist').value, 
+            psiq: document.getElementById('p-psiq').value,
+            c: document.getElementById('p-cond').value, 
+            fech: document.getElementById('p-fech').value
+        };
+        localStorage.setItem('db_psi_final_safe', JSON.stringify(db));
+        document.getElementById('editor').style.display = 'none'; 
+        renderMapa();
+        alert("Salvo!");
+    }
+
+    function switchTab(t) {
+        document.querySelectorAll('.aba-view').forEach(el => el.style.display = 'none');
+        document.getElementById('aba-' + t).style.display = 'block';
+        document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+        if(t === 'pas') renderPassagem();
+    }
+
+    function renderPassagem() {
+        const u = document.getElementById('sel-uti').value;
+        document.getElementById('p-header').innerText = `PLANTÃO PSI - ${u}`;
+        let html = '';
+        for(let l in db) if(db[l].n) {
+            let p = db[l];
+            html += `<div class="print-card">
+                <b>LEITO ${l}: ${p.n.toUpperCase()}</b><br>
+                <small>PROBLEMAS: ${p.prob}</small><br>
+                <div style="margin-top:5px"><b>EVOLUÇÃO:</b> ${p.h}</div>
+                <div><b>EXAME PSÍQUICO:</b> ${p.psiq}</div>
+                <div><b>CONDUTA:</b> ${p.c} ${p.fech ? ' | <b>ALTA:</b> '+p.fech : ''}</div>
+            </div>`;
+        }
+        document.getElementById('p-corpo').innerHTML = html || 'Sem dados.';
+    }
+</script>
+</body>
+</html>
