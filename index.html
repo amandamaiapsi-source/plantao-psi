@@ -8,7 +8,7 @@
         :root { --cafe: #8D6E63; --cafe-esc: #4E342E; }
         body { font-family: 'Segoe UI', sans-serif; background: white; color: black; margin: 0; padding: 15px; }
         .logo { color: var(--cafe-esc); font-size: 24px; font-weight: bold; text-align: center; margin-bottom: 20px; }
-        .login-box { max-width: 300px; margin: 100px auto; padding: 25px; border: 1px solid #ddd; border-radius: 12px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .login-box { max-width: 300px; margin: 80px auto; padding: 25px; border: 1px solid #ddd; border-radius: 12px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         input, textarea, select { width: 100%; padding: 10px; margin: 5px 0 15px 0; border: 1px solid var(--cafe); border-radius: 6px; box-sizing: border-box; font-size: 14px; }
         label { font-weight: bold; color: var(--cafe-esc); font-size: 14px; display: block; margin-top: 10px; }
         button { width: 100%; padding: 12px; background: var(--cafe); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 10px; }
@@ -22,15 +22,11 @@
         .tab.active { border-bottom: 3px solid var(--cafe-esc); color: var(--cafe-esc); }
         #app-content, #editor, .aba-view { display: none; }
         .titulo-leito { background: var(--cafe-esc); color: white; padding: 10px; border-radius: 6px; margin-bottom: 15px; font-size: 18px; font-weight: bold; }
-        
-        /* IMPRESSÃO FICHA */
-        .p-box { display: none; border: 1.5px solid #000; padding: 10px; margin-bottom: 15px; page-break-inside: avoid; }
-        .p-head { display: none; font-size: 18px; font-weight: bold; text-align: center; border-bottom: 2px solid #000; margin-bottom: 15px; }
-
+        .p-box { display: none; border: 1.5px solid #000; padding: 10px; margin-bottom: 15px; }
         @media print {
             @page { size: portrait; margin: 1cm; }
             .tabs, #editor, select, .logo, button, label, .grid, .login-box { display: none !important; }
-            #app-content, #aba-pas, .p-box, .p-head { display: block !important; }
+            #app-content, #aba-pas, .p-box, .p-head-print { display: block !important; }
             body { padding: 0; }
         }
     </style>
@@ -46,11 +42,10 @@
 <div id="app-content">
     <div class="logo">PLANTÃO <span style="color:var(--cafe)">PSI</span></div>
     <div class="tabs">
-        <div class="tab active" onclick="switchTab('mapa')">🗺️ MAPA</div>
-        <div class="tab" onclick="switchTab('bol')">📢 BOLETIM</div>
-        <div class="tab" onclick="switchTab('pen')">📌 PENDÊNCIAS</div>
-        <div class="tab" onclick="switchTab('alt')">🚪 ALTAS</div>
-        <div class="tab" onclick="switchTab('pas')">🖨️ IMPRIMIR</div>
+        <div class="tab active" onclick="switchTab('mapa')">MAPA</div>
+        <div class="tab" onclick="switchTab('bol')">BOLETIM</div>
+        <div class="tab" onclick="switchTab('pen')">PENDÊNCIAS</div>
+        <div class="tab" onclick="switchTab('pas')">IMPRIMIR</div>
     </div>
 
     <div id="aba-mapa" class="aba-view" style="display: block;">
@@ -59,9 +54,16 @@
         <div id="editor" style="margin-top: 25px; border-top: 2px solid #eee; padding-top: 15px;">
             <div id="nome-topo" class="titulo-leito">LEITO</div>
             <label>Paciente:</label><input type="text" id="p-nome" oninput="atualizarNomeTopo()">
-            
             <label>Marcadores Clínicos:</label>
             <div class="check-grid">
                 <label class="check-item"><input type="checkbox" id="p-vm"> VM</label>
-                <label class="check-item"><input type="checkbox" id="p-esp"> ESPONTÂNEA</label>
-                <label class
+                <label class="check-item"><input type="checkbox" id="p-esp"> ESP</label>
+                <label class="check-item"><input type="checkbox" id="p-del"> DELIRIUM</label>
+                <label class="check-item"><input type="checkbox" id="p-iso"> ISO</label>
+                <label class="check-item"><input type="checkbox" id="p-cp"> PALIATIVO</label>
+                <label class="check-item"><input type="checkbox" id="p-alta"> ALTA</label>
+            </div>
+            <label>Problemas:</label><textarea id="p-prob" rows="2"></textarea>
+            <label>Evolução:</label><textarea id="p-hist" rows="3"></textarea>
+            <label>Exame Psíquico:</label><textarea id="p-psiq" rows="3"></textarea>
+            <label>Conduta:</label><textarea id="p
