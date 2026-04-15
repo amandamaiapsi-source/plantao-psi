@@ -8,20 +8,20 @@
         :root { --cafe: #8D6E63; --cafe-esc: #4E342E; }
         body { font-family: 'Segoe UI', sans-serif; background: white; color: black; margin: 0; padding: 15px; }
         .logo { color: var(--cafe-esc); font-size: 24px; font-weight: bold; text-align: center; margin-bottom: 20px; }
-        .login-container { max-width: 320px; margin: 80px auto; padding: 25px; border: 1px solid #ddd; border-radius: 12px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .login-container { max-width: 320px; margin: 80px auto; padding: 25px; border: 1px solid #ddd; border-radius: 12px; text-align: center; }
         input, textarea, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid var(--cafe); border-radius: 6px; box-sizing: border-box; font-size: 14px; }
         button { width: 100%; padding: 12px; background: var(--cafe); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 5px; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; margin-top: 15px; }
         .card { background: #Fdf5f2; border: 1px solid #ddd; border-top: 4px solid var(--cafe); padding: 12px; border-radius: 8px; text-align: center; cursor: pointer; min-height: 85px; }
-        .card:hover { background: #faede9; }
         .check-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px; font-size: 12px; padding: 10px 0; text-align: left; }
         .tabs { display: flex; gap: 5px; margin-bottom: 15px; border-bottom: 2px solid #eee; overflow-x: auto; }
         .tab { padding: 10px; cursor: pointer; font-weight: bold; color: var(--cafe); white-space: nowrap; }
         .tab.active { border-bottom: 3px solid var(--cafe-esc); color: var(--cafe-esc); }
         #app-content, #editor, .aba-view { display: none; }
-        table { width:100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        @media print { .tabs, #editor, select, .logo, button, h3 { display: none !important; } .aba-view { display: block !important; } }
+        table { width:100%; border-collapse: collapse; font-size: 11px; margin-top: 10px; }
+        th, td { border: 1px solid #333; padding: 6px; text-align: left; vertical-align: top; }
+        .titulo-leito { background: var(--cafe-esc); color: white; padding: 10px; border-radius: 6px; margin-bottom: 10px; font-size: 18px; font-weight: bold; }
+        @media print { .tabs, #editor, select, .logo, button, #mapa, .header-uti { display: none !important; } .aba-view { display: block !important; } }
     </style>
 </head>
 <body>
@@ -35,18 +35,18 @@
 <div id="app-content">
     <div class="logo">PLANTÃO <span style="color:var(--cafe)">PSI</span></div>
     <div class="tabs">
-        <div class="tab active" onclick="switchTab('mapa')">MAPA</div>
-        <div class="tab" onclick="switchTab('pen')">PENDÊNCIAS</div>
-        <div class="tab" onclick="switchTab('alt')">ALTAS</div>
-        <div class="tab" onclick="switchTab('pas')">PASSAGEM</div>
+        <div class="tab active" onclick="switchTab('mapa')">🗺️ MAPA</div>
+        <div class="tab" onclick="switchTab('pen')">📌 PENDÊNCIAS</div>
+        <div class="tab" onclick="switchTab('alt')">🚪 ALTAS</div>
+        <div class="tab" onclick="switchTab('pas')">🖨️ PASSAGEM</div>
     </div>
 
     <div id="aba-mapa" class="aba-view" style="display: block;">
-        <select id="sel-uti" onchange="renderMapa()"></select>
+        <select id="sel-uti" onchange="renderMapa()" class="header-uti"></select>
         <div class="grid" id="mapa"></div>
         <div id="editor" style="margin-top: 20px; border-top: 2px solid #eee; padding-top: 15px;">
-            <h3 id="edit-titulo" style="color:var(--cafe-esc)">Ficha do Leito</h3>
-            <input type="text" id="p-nome" placeholder="Nome do Paciente">
+            <div id="nome-topo" class="titulo-leito">LEITO</div>
+            <input type="text" id="p-nome" placeholder="Nome Completo do Paciente" oninput="atualizarNomeTopo()">
             <div class="check-grid">
                 <label><input type="checkbox" id="p-vm"> VM</label>
                 <label><input type="checkbox" id="p-esp"> ESPONTÂNEA</label>
@@ -57,16 +57,18 @@
                 <label><input type="checkbox" id="p-poi"> POI</label>
                 <label><input type="checkbox" id="p-alta"> ALTA</label>
             </div>
-            <textarea id="p-hist" rows="4" placeholder="História Médica / Problemas"></textarea>
-            <textarea id="p-pend" rows="2" placeholder="Pendências para o próximo plantão"></textarea>
+            <textarea id="p-prob" rows="3" placeholder="Lista de Problemas / Diagnósticos"></textarea>
+            <textarea id="p-hist" rows="4" placeholder="História Médica / Evolução Clínica"></textarea>
+            <textarea id="p-psiq" rows="4" placeholder="Exame das Funções Psíquicas (Atenção, Humor, Pensamento...)"></textarea>
             <textarea id="p-cond" rows="4" placeholder="Manejo e Conduta Psicológica"></textarea>
+            <textarea id="p-pend" rows="2" placeholder="📌 Pendências para o próximo plantão"></textarea>
             <button onclick="salvar()">💾 SALVAR NO SISTEMA</button>
         </div>
     </div>
 
-    <div id="aba-pen" class="aba-view"><h3>📌 Pendências</h3><div id="lista-pen"></div></div>
-    <div id="aba-alt" class="aba-view"><h3>🚪 Altas / Transferências</h3><div id="lista-alt"></div></div>
-    <div id="aba-pas" class="aba-view"><h3>📋 Relatório de Passagem</h3><div id="tab-pas"></div></div>
+    <div id="aba-pen" class="aba-view"><h3>📌 Pendências por Leito</h3><div id="lista-pen"></div></div>
+    <div id="aba-alt" class="aba-view"><h3>🚪 Previsão de Altas</h3><div id="lista-alt"></div></div>
+    <div id="aba-pas" class="aba-view"><h3>📋 Relatório de Passagem de Plantão</h3><div id="tab-pas"></div></div>
 </div>
 
 <script>
@@ -77,101 +79,10 @@
         "UCV 4": ["33","34","35","36","37","38","39"]
     };
 
-    let db = JSON.parse(localStorage.getItem('psi_db_v2')) || {};
+    let db = JSON.parse(localStorage.getItem('psi_db_final')) || {};
     let foco = null;
 
     function logar() {
         if(document.getElementById('pass').value === "psi123") {
             document.getElementById('login-screen').style.display = 'none';
-            document.getElementById('app-content').style.display = 'block';
-            const sel = document.getElementById('sel-uti');
-            sel.innerHTML = '';
-            for(let u in unds) sel.innerHTML += `<option value="${u}">${u}</option>`;
-            renderMapa();
-        } else { alert("Senha incorreta!"); }
-    }
-
-    function renderMapa() {
-        const u = document.getElementById('sel-uti').value;
-        const m = document.getElementById('mapa');
-        m.innerHTML = '';
-        unds[u].forEach(l => {
-            const p = db[l] || {n: ""};
-            let status = p.alta ? '<br><small style="color:green"><b>ALTA</b></small>' : '';
-            m.innerHTML += `<div class="card" onclick="abrir('${l}')"><b>LEITO ${l}</b><br><small>${p.n || 'Vazio'}</small>${status}</div>`;
-        });
-    }
-
-    function abrir(l) {
-        foco = l;
-        const p = db[l] || {n:"", h:"", c:"", pend:"", vm:false, esp:false, del:false, iso:false, cp:false, cf:false, poi:false, alta:false};
-        document.getElementById('edit-titulo').innerText = "Editando Leito " + l;
-        document.getElementById('p-nome').value = p.n;
-        document.getElementById('p-hist').value = p.h;
-        document.getElementById('p-cond').value = p.c;
-        document.getElementById('p-pend').value = p.pend || "";
-        document.getElementById('p-vm').checked = p.vm;
-        document.getElementById('p-esp').checked = p.esp;
-        document.getElementById('p-del').checked = p.del;
-        document.getElementById('p-iso').checked = p.iso;
-        document.getElementById('p-cp').checked = p.cp;
-        document.getElementById('p-cf').checked = p.cf;
-        document.getElementById('p-poi').checked = p.poi;
-        document.getElementById('p-alta').checked = p.alta;
-        document.getElementById('editor').style.display = 'block';
-        window.scrollTo(0, document.body.scrollHeight);
-    }
-
-    function salvar() {
-        db[foco] = {
-            n: document.getElementById('p-nome').value,
-            h: document.getElementById('p-hist').value,
-            c: document.getElementById('p-cond').value,
-            pend: document.getElementById('p-pend').value,
-            vm: document.getElementById('p-vm').checked,
-            esp: document.getElementById('p-esp').checked,
-            del: document.getElementById('p-del').checked,
-            iso: document.getElementById('p-iso').checked,
-            cp: document.getElementById('p-cp').checked,
-            cf: document.getElementById('p-cf').checked,
-            poi: document.getElementById('p-poi').checked,
-            alta: document.getElementById('p-alta').checked
-        };
-        localStorage.setItem('psi_db_v2', JSON.stringify(db));
-        document.getElementById('editor').style.display = 'none';
-        renderMapa();
-    }
-
-    function switchTab(t) {
-        document.querySelectorAll('.aba-view').forEach(el => el.style.display = 'none');
-        document.getElementById('aba-' + t).style.display = 'block';
-        if(t === 'pas') renderPassagem();
-        if(t === 'alt') renderAltas();
-        if(t === 'pen') renderPendencias();
-    }
-
-    function renderPassagem() {
-        let h = '<table><tr><th>Leito</th><th>Paciente</th><th>Clínica</th><th>História</th><th>Conduta</th></tr>';
-        for(let l in db) if(db[l].n) {
-            let t = [];
-            if(db[l].vm) t.push("VM"); if(db[l].esp) t.push("ESP"); if(db[l].del) t.push("DEL");
-            if(db[l].cp) t.push("CP"); if(db[l].poi) t.push("POI");
-            h += `<tr><td>${l}</td><td>${db[l].n}</td><td>${t.join(', ')}</td><td>${db[l].h}</td><td>${db[l].c}</td></tr>`;
-        }
-        document.getElementById('tab-pas').innerHTML = h + '</table>';
-    }
-
-    function renderAltas() {
-        let h = '<ul>';
-        for(let l in db) if(db[l].alta) h += `<li><b>Leito ${l}:</b> ${db[l].n}</li>`;
-        document.getElementById('lista-alt').innerHTML = h + '</ul>';
-    }
-
-    function renderPendencias() {
-        let h = '<ul>';
-        for(let l in db) if(db[l].pend) h += `<li><b>Leito ${l}:</b> ${db[l].pend}</li>`;
-        document.getElementById('lista-pen').innerHTML = h + '</ul>';
-    }
-</script>
-</body>
-</html>
+            document.getElementById('app-content').style.display =
