@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plantão PSI - Amanda Maia</title>
+    <style>
+        :root { --cafe: #8D6E63; --cafe-esc: #4E342E; }
+        body { font-family: 'Segoe UI', sans-serif; background: white; color: black; margin: 0; padding: 15px; }
+        .logo { color: var(--cafe-esc); font-size: 24px; font-weight: bold; text-align: center; margin-bottom: 20px; }
+        .login-container { max-width: 300px; margin: 80px auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        input, textarea, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid var(--cafe); border-radius: 6px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: var(--cafe); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 8px; margin-top: 15px; }
+        .card { background: #Fdf5f2; border: 1px solid #ddd; border-top: 4px solid var(--cafe); padding: 10px; border-radius: 6px; text-align: center; font-size: 13px; }
+        .tag { font-size: 9px; padding: 2px 4px; border-radius: 3px; color: white; margin: 1px; display: inline-block; font-weight: bold; }
+        #app-content { display: none; }
+        .uti-header { background: var(--cafe-esc); color: white; padding: 8px; border-radius: 4px; margin-top: 15px; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+<div id="login-screen" class="login-container">
+    <div class="logo">PLANTÃO <span style="color:var(--cafe)">PSI</span></div>
+    <input type="password" id="pass" placeholder="Sua Senha">
+    <button onclick="logar()">ENTRAR</button>
+</div>
+
+<div id="app-content">
+    <div class="logo">PLANTÃO <span style="color:var(--cafe)">PSI</span></div>
+    <div class="uti-header">Selecione a Unidade</div>
+    <select id="sel-uti" onchange="render()">
+        <option value="U1">UCV 1 (Leitos 1-7)</option>
+        <option value="U2">UCV 2 (10-17, 40, 41)</option>
+        <option value="U3">UCV 3 (Leitos 18-32)</option>
+        <option value="U4">UCV 4 (Leitos 33-39)</option>
+    </select>
+    <div class="grid" id="mapa"></div>
+</div>
+
+<script>
+    const unds = {
+        "U1": ["1","2","3","4","5","6","7"],
+        "U2": ["10","11","12","13","14","15","16","17","40","41"],
+        "U3": ["18","19","20","21","22","23","24","25","26","27","28","29","30","31","32"],
+        "U4": ["33","34","35","36","37","38","39"]
+    };
+
+    function logar() {
+        if(document.getElementById('pass').value === "psi123") {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('app-content').style.display = 'block';
+            render();
+        } else { alert("Senha incorreta!"); }
+    }
+
+    function render() {
+        const u = document.getElementById('sel-uti').value;
+        const m = document.getElementById('mapa');
+        m.innerHTML = '';
+        unds[u].forEach(l => {
+            m.innerHTML += `<div class="card"><b>L${l}</b><br><small>Vazio</small></div>`;
+        });
+    }
+</script>
+</body>
+</html>
