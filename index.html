@@ -3,39 +3,207 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SISTEMA PSI AMANDA</title>
+    <title>GESTÃO DE LEITOS UTI - PSICOLOGIA HOSPITALAR</title>
     <style>
         :root { --cafe: #8D6E63; --cafe-esc: #4E342E; }
-        body { font-family: sans-serif; background: #fff; padding: 15px; }
-        .login-box { max-width: 300px; margin: 60px auto; padding: 20px; border: 2px solid var(--cafe); border-radius: 10px; text-align: center; }
-        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; font-size: 16px; }
-        button { width: 100%; padding: 12px; background: var(--cafe); color: white; border: none; font-weight: bold; cursor: pointer; border-radius: 5px; margin-top: 10px; }
-        #painel, .aba, #editor { display: none; }
-        .tabs { display: flex; gap: 8px; border-bottom: 2px solid #eee; margin-bottom: 15px; overflow-x: auto; }
+        body { font-family: 'Segoe UI', sans-serif; background: white; color: black; margin: 0; padding: 15px; }
+        .logo { color: var(--cafe-esc); font-size: 20px; font-weight: bold; text-align: center; margin-bottom: 20px; text-transform: uppercase; }
+        .login-box { max-width: 350px; margin: 80px auto; padding: 30px; border: 1px solid #ddd; border-radius: 12px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        input, textarea, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid var(--cafe); border-radius: 6px; box-sizing: border-box; font-size: 14px; }
+        label { font-weight: bold; color: var(--cafe-esc); display: block; margin-top: 12px; font-size: 14px; }
+        button { width: 100%; padding: 12px; background: var(--cafe); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; margin-top: 15px; }
+        .card { background: #Fdf5f2; border: 1px solid #ddd; border-top: 4px solid var(--cafe); padding: 12px; border-radius: 8px; text-align: center; cursor: pointer; min-height: 85px; }
+        .check-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 10px 0; }
+        .check-item { display: flex; align-items: center; gap: 8px; font-weight: normal; color: black; font-size: 12px; cursor: pointer; }
+        .tabs { display: flex; gap: 5px; margin-bottom: 15px; border-bottom: 2px solid #eee; overflow-x: auto; }
         .tab { padding: 10px; cursor: pointer; font-weight: bold; color: var(--cafe); white-space: nowrap; }
         .tab.active { border-bottom: 3px solid var(--cafe-esc); color: var(--cafe-esc); }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
-        .card { background: #fdf5f2; border: 1px solid #ddd; padding: 10px; text-align: center; cursor: pointer; border-radius: 8px; border-top: 4px solid var(--cafe); }
-        label { font-weight: bold; display: block; margin-top: 10px; color: var(--cafe-esc); font-size: 14px; }
-        textarea { width: 100%; padding: 8px; border: 1px solid var(--cafe); border-radius: 5px; box-sizing: border-box; }
-        .checks { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; padding: 5px 0; font-size: 12px; }
-        .p-box { border: 2px solid #000; padding: 10px; margin-bottom: 15px; }
-        @media print { .tabs, #editor, button, label, .grid, .login-box, select { display: none !important; } .p-box, #aba-pas { display: block !important; } }
+        #app-content, #editor, .aba-view { display: none; }
+        .titulo-leito { background: var(--cafe-esc); color: white; padding: 10px; border-radius: 6px; margin-bottom: 15px; font-size: 18px; font-weight: bold; }
+        .p-box { display: none; border: 1.5px solid #000; padding: 10px; margin-bottom: 15px; page-break-inside: avoid; }
+        @media print {
+            @page { size: portrait; margin: 1cm; }
+            .tabs, #editor, select, .logo, button, label, .grid, .login-box { display: none !important; }
+            #app-content, #aba-pas, .p-box { display: block !important; }
+            body { padding: 0; }
+        }
     </style>
 </head>
 <body>
 
-<div id="tela-login" class="login-box">
-    <h3>ACESSO RESTRITO</h3>
-    <input type="password" id="campo-senha" placeholder="DIGITE A SENHA">
-    <button onclick="tentarEntrar()">ENTRAR</button>
+<div id="login-screen" class="login-box">
+    <div class="logo">GESTÃO DE LEITOS UTI<br><span style="color:var(--cafe); font-size: 14px;">PSICOLOGIA HOSPITALAR</span></div>
+    <input type="password" id="pass_access" placeholder="Digite a senha" onkeypress="if(event.key==='Enter') action_login()">
+    <button onclick="action_login()">ENTRAR NO SISTEMA</button>
 </div>
 
-<div id="painel">
+<div id="app-content">
+    <div class="logo">GESTÃO DE LEITOS UTI</div>
     <div class="tabs">
-        <div class="tab" id="t-mapa" onclick="mudarTab('mapa')">MAPA</div>
-        <div class="tab" id="t-pas" onclick="mudarTab('pas')">IMPRIMIR</div>
+        <div class="tab active" onclick="nav('mapa')">🗺️ MAPA</div>
+        <div class="tab" onclick="nav('bol')">📢 BOLETIM</div>
+        <div class="tab" onclick="nav('pen')">📌 PENDÊNCIAS</div>
+        <div class="tab" onclick="nav('alt')">🚪 ALTAS</div>
+        <div class="tab" onclick="nav('pas')">🖨️ IMPRIMIR</div>
     </div>
 
-    <div id="aba-mapa" class="aba" style="display:block">
-        <select id="escolha-uti" onchange="gerarMapa()"></select>
+    <div id="aba-mapa" class="aba-view" style="display: block;">
+        <select id="select_uti" onchange="draw_map()"></select>
+        <div class="grid" id="map_grid"></div>
+        <div id="editor" style="margin-top: 25px; border-top: 2px solid #eee; padding-top: 15px;">
+            <div id="nome-topo" class="titulo-leito">LEITO</div>
+            <label>Nome do Paciente:</label><input type="text" id="in_nome" oninput="update_title()">
+            <label>Marcadores Clínicos:</label>
+            <div class="check-grid">
+                <label class="check-item"><input type="checkbox" id="in_vm"> VM</label>
+                <label class="check-item"><input type="checkbox" id="in_esp"> ESPONTÂNEA</label>
+                <label class="check-item"><input type="checkbox" id="in_del"> DELIRIUM</label>
+                <label class="check-item"><input type="checkbox" id="in_iso"> ISOLAMENTO</label>
+                <label class="check-item"><input type="checkbox" id="in_cp"> PALIATIVO</label>
+                <label class="check-item"><input type="checkbox" id="in_alta"> ALTA</label>
+            </div>
+            <label>Lista de Problemas:</label><textarea id="in_prob" rows="2"></textarea>
+            <label>Evolução Clínica:</label><textarea id="in_evo" rows="4"></textarea>
+            <label>Exame das Funções Psíquicas:</label><textarea id="in_psiq" rows="4"></textarea>
+            <label>Manejo e Conduta:</label><textarea id="in_cond" rows="4"></textarea>
+            <label>Fechamento de Alta:</label><textarea id="in_fech" rows="2"></textarea>
+            <label>Informações do Boletim:</label><textarea id="in_bol" rows="2"></textarea>
+            <label>📌 Pendências:</label>
+            <div class="check-grid">
+                <label class="check-item"><input type="checkbox" id="pe_f"> Falar Família</label>
+                <label class="check-item"><input type="checkbox" id="pe_b"> Boletim</label>
+                <label class="check-item"><input type="checkbox" id="pe_c"> CDI/TRC</label>
+                <label class="check-item"><input type="checkbox" id="pe_vi"> V. Infantil</label>
+                <label class="check-item"><input type="checkbox" id="pe_ve"> V. Estendida</label>
+            </div>
+            <textarea id="in_obs" rows="2" placeholder="Outras..."></textarea>
+            <button onclick="save_data()">💾 SALVAR DADOS NO LEITO</button>
+        </div>
+    </div>
+
+    <div id="aba-bol" class="aba-view"><h3>📢 Boletins</h3><div id="list_bol"></div></div>
+    <div id="aba-pen" class="aba-view"><h3>📌 Pendências</h3><div id="list_pen"></div></div>
+    <div id="aba-alt" class="aba-view"><h3>🚪 Altas</h3><div id="list_alt"></div></div>
+    <div id="aba-pas" class="aba-view"><h3 style="text-align:center; border-bottom: 2px solid #000; padding-bottom: 10px;">DESCRIÇÃO DO PLANTÃO - <span id="print_uti_name"></span></h3><div id="print_body"></div></div>
+</div>
+
+<script>
+    const config_unds = { "UCV 1": ["1","2","3","4","5","6","7"], "UCV 2": ["10","11","12","13","14","15","16","17","40","41"], "UCV 3": ["18","19","20","21","22","23","24","25","26","27","28","29","30","31","32"], "UCV 4": ["33","34","35","36","37","38","39"] };
+    let storage_db = JSON.parse(localStorage.getItem('DB_FINAL_V100_AMANDA')) || {};
+    let current_l = null;
+
+    function action_login() {
+        if(document.getElementById('pass_access').value === "psi123") {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('app-content').style.display = 'block';
+            const s = document.getElementById('select_uti'); s.innerHTML = '';
+            for(let u in config_unds) s.innerHTML += `<option value="${u}">${u}</option>`;
+            draw_map();
+        } else { alert("Senha incorreta!"); }
+    }
+
+    function draw_map() {
+        const u = document.getElementById('select_uti').value;
+        const g = document.getElementById('map_grid'); g.innerHTML = '';
+        config_unds[u].forEach(l => {
+            const p = storage_db[l] || {n: ""};
+            g.innerHTML += `<div class="card" onclick="edit_l('${l}')"><b>L${l}</b><br><small>${p.n || 'Vazio'}</small></div>`;
+        });
+    }
+
+    function update_title() {
+        const n = document.getElementById('in_nome').value;
+        document.getElementById('nome-topo').innerText = n ? `LEITO ${current_l}: ${n.toUpperCase()}` : `LEITO ${current_l}`;
+    }
+
+    function edit_l(l) {
+        current_l = l;
+        const p = storage_db[l] || {n:"", prob:"", evo:"", psiq:"", cond:"", bol:"", obs:"", fech:"", vm:0, esp:0, del:0, iso:0, cp:0, alta:0, pf:0, pb:0, pc:0, pvi:0, pve:0};
+        document.getElementById('in_nome').value = p.n;
+        document.getElementById('in_prob').value = p.prob;
+        document.getElementById('in_evo').value = p.evo;
+        document.getElementById('in_psiq').value = p.psiq;
+        document.getElementById('in_cond').value = p.cond;
+        document.getElementById('in_bol').value = p.bol;
+        document.getElementById('in_obs').value = p.obs;
+        document.getElementById('in_fech').value = p.fech;
+        document.getElementById('in_vm').checked = p.vm;
+        document.getElementById('in_esp').checked = p.esp;
+        document.getElementById('in_del').checked = p.del;
+        document.getElementById('in_iso').checked = p.iso;
+        document.getElementById('in_cp').checked = p.cp;
+        document.getElementById('in_alta').checked = p.alta;
+        document.getElementById('pe_f').checked = p.pf;
+        document.getElementById('pe_b').checked = p.pb;
+        document.getElementById('pe_c').checked = p.pc;
+        document.getElementById('pe_vi').checked = p.pvi;
+        document.getElementById('pe_ve').checked = p.pve;
+        update_title();
+        document.getElementById('editor').style.display = 'block';
+        window.scrollTo(0, document.getElementById('editor').offsetTop);
+    }
+
+    function save_data() {
+        storage_db[current_l] = {
+            n: document.getElementById('in_nome').value, prob: document.getElementById('in_prob').value,
+            evo: document.getElementById('in_evo').value, psiq: document.getElementById('in_psiq').value,
+            cond: document.getElementById('in_cond').value, bol: document.getElementById('in_bol').value,
+            obs: document.getElementById('in_obs').value, fech: document.getElementById('in_fech').value,
+            vm: document.getElementById('in_vm').checked, esp: document.getElementById('in_esp').checked,
+            del: document.getElementById('in_del').checked, iso: document.getElementById('in_iso').checked,
+            cp: document.getElementById('in_cp').checked, alta: document.getElementById('in_alta').checked,
+            pf: document.getElementById('pe_f').checked, pb: document.getElementById('pe_b').checked,
+            pc: document.getElementById('pe_c').checked, pvi: document.getElementById('pe_vi').checked, pve: document.getElementById('pe_ve').checked
+        };
+        localStorage.setItem('DB_FINAL_V100_AMANDA', JSON.stringify(storage_db));
+        document.getElementById('editor').style.display = 'none'; draw_map();
+        alert("Salvo com sucesso!");
+    }
+
+    function nav(t) {
+        document.querySelectorAll('.aba-view').forEach(el => el.style.display = 'none');
+        document.getElementById('aba-' + t).style.display = 'block';
+        document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+        if(t === 'pas') render_pas();
+        if(t === 'alt') render_alt();
+        if(t === 'pen') render_pen();
+        if(t === 'bol') render_bol();
+    }
+
+    function render_pas() {
+        const u = document.getElementById('select_uti').value;
+        document.getElementById('print_uti_name').innerText = u;
+        let html = '';
+        for(let l in storage_db) if(storage_db[l].n) {
+            let p = storage_db[l]; let cl = []; if(p.vm) cl.push("VM"); if(p.esp) cl.push("ESP"); if(p.del) cl.push("DEL"); if(p.cp) cl.push("CP");
+            html += `<div class="p-box"><b>LEITO ${l}: ${p.n.toUpperCase()}</b> | <i>PROB: ${p.prob}</i><br><b>CLÍNICA:</b> ${cl.join(', ')}<br><b>EVOLUÇÃO:</b> ${p.evo}<br><b>EXAME PSÍQUICO:</b> ${p.psiq}<br><b>CONDUTA:</b> ${p.cond} ${p.fech ? ' | <b>ALTA:</b> '+p.fech : ''}</div>`;
+        }
+        document.getElementById('print_body').innerHTML = html || 'Vazio';
+    }
+
+    function render_alt() {
+        let h = '<ul>';
+        for(let l in storage_db) if(storage_db[l].alta) h += `<li>L${l}: ${storage_db[l].n}</li>`;
+        document.getElementById('list_alt').innerHTML = h + '</ul>';
+    }
+
+    function render_bol() {
+        let h = '';
+        for(let l in storage_db) if(storage_db[l].bol) h += `<div style="margin-bottom:10px"><b>L${l}:</b> ${storage_db[l].bol}</div>`;
+        document.getElementById('list_bol').innerHTML = h || 'Vazio';
+    }
+
+    function render_pen() {
+        let h = '';
+        for(let l in storage_db) {
+            let p = storage_db[l]; let pens = [];
+            if(p.pf) pens.push("Falar Família"); if(p.pb) pens.push("Boletim"); if(p.pc) pens.push("CDI/TRC");
+            if(p.pvi) pens.push("V. Infantil"); if(p.pve) pens.push("V. Estendida"); if(p.obs) pens.push(p.obs);
+            if(p.n && pens.length > 0) h += `<b>L${l} (${p.n}):</b><ul>` + pens.map(i => `<li>${i}</li>`).join('') + `</ul>`;
+        }
+        document.getElementById('list_pen').innerHTML = h || 'Vazio';
+    }
+</script>
+</body>
+</html>
