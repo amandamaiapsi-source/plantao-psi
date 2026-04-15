@@ -180,32 +180,48 @@
     }
 
     function renderMulti() {
-        const uti = document.getElementById('uti').value;
-        document.getElementById('titulo_multi').innerText = "VISITA MULTI - " + uti;
+        const utiSelecionada = document.getElementById('uti').value;
+        const listaLeitosUti = ucvs[utiSelecionada];
+        document.getElementById('titulo_multi').innerText = "VISITA MULTI - " + utiSelecionada;
+        
         let h = '<table class="tabela-multi"><thead><tr><th>L</th><th>Paciente (Idade)</th><th>Smart</th><th>Clínica</th><th>Problemas</th><th>Evolução</th><th>Psíquico</th><th>Conduta</th></tr></thead><tbody>';
-        for(let l in db) if(db[l].n) {
-            let p = db[l]; let cl = []; if(p.vm) cl.push("VM/SED"); if(p.del) cl.push("DEL"); if(p.pal) cl.push("PAL");
-            h += `<tr><td>${l}</td><td>${p.n} (${p.id})</td><td>${p.sm}</td><td>${cl.join(', ')}</td><td>${p.pr}</td><td>${p.ev}</td><td>${p.ps}</td><td>${p.co}</td></tr>`;
-        }
+        
+        listaLeitosUti.forEach(l => {
+            if(db[l] && db[l].n) {
+                let p = db[l]; 
+                let cl = []; 
+                if(p.vm) cl.push("VM/SED"); if(p.del) cl.push("DEL"); if(p.pal) cl.push("PAL");
+                h += `<tr><td>${l}</td><td>${p.n} (${p.id})</td><td>${p.sm}</td><td>${cl.join(', ')}</td><td>${p.pr}</td><td>${p.ev}</td><td>${p.ps}</td><td>${p.co}</td></tr>`;
+            }
+        });
+        
         document.getElementById('v_multi').innerHTML = h + '</tbody></table><button class="btn" onclick="window.print()" style="margin-top:20px">🖨️ IMPRIMIR TABELA</button>';
     }
 
     function renderPen() {
+        const utiSel = document.getElementById('uti').value;
+        const leitosUti = ucvs[utiSel];
         let h = '';
-        for(let l in db) {
-            let p = db[l]; let pens = [];
-            if(p.pdesp) pens.push("Avaliar Despertar"); if(p.pvig) pens.push("Vigilância Delirium");
-            if(p.pconf) pens.push("Conf. Familiar"); if(p.pluto) pens.push("Suporte Luto");
-            if(p.pvinf) pens.push("Visita Infantil"); if(p.pf) pens.push("Falar Família");
-            if(p.n && (pens.length || p.ob)) h += `<b>L${l} (${p.n}):</b> ${pens.join(', ')} ${p.ob ? '- '+p.ob : ''}<br><hr>`;
-        }
-        document.getElementById('v_pen').innerHTML = h || 'Vazio';
+        leitosUti.forEach(l => {
+            if(db[l]) {
+                let p = db[l]; let pens = [];
+                if(p.pdesp) pens.push("Avaliar Despertar"); if(p.pvig) pens.push("Vigilância Delirium");
+                if(p.pconf) pens.push("Conf. Familiar"); if(p.pluto) pens.push("Suporte Luto");
+                if(p.pvinf) pens.push("Visita Infantil"); if(p.pf) pens.push("Falar Família");
+                if(p.n && (pens.length || p.ob)) h += `<b>L${l} (${p.n}):</b> ${pens.join(', ')} ${p.ob ? '- '+p.ob : ''}<br><hr>`;
+            }
+        });
+        document.getElementById('v_pen').innerHTML = h || 'Nenhuma pendência na unidade selecionada.';
     }
 
     function renderBol() {
+        const utiSel = document.getElementById('uti').value;
+        const leitosUti = ucvs[utiSel];
         let h = '';
-        for(let l in db) if(db[l].bo) h += `<b>L${l}:</b> ${db[l].bo}<br><hr>`;
-        document.getElementById('v_bol').innerHTML = h || 'Vazio';
+        leitosUti.forEach(l => {
+            if(db[l] && db[l].bo) h += `<b>L${l}:</b> ${db[l].bo}<br><hr>`;
+        });
+        document.getElementById('v_bol').innerHTML = h || 'Nenhum boletim registrado nesta unidade.';
     }
 </script>
 </body>
