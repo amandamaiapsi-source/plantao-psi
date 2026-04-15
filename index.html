@@ -3,50 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GESTÃO DE LEITOS UTI - PSICOLOGIA HOSPITALAR</title>
+    <title>GESTÃO PSI - AMANDA MAIA</title>
     <style>
         :root { --cafe: #8D6E63; --cafe-esc: #4E342E; }
-        body { font-family: 'Segoe UI', sans-serif; background: #fff; color: #000; margin: 0; padding: 15px; }
-        .logo-hosp { color: var(--cafe-esc); font-size: 18px; font-weight: bold; text-align: center; margin-bottom: 20px; text-transform: uppercase; }
-        .login-card { max-width: 350px; margin: 80px auto; padding: 30px; border: 1px solid #ddd; border-radius: 12px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        input, textarea, select { width: 100%; padding: 10px; margin: 5px 0 15px 0; border: 1px solid var(--cafe); border-radius: 6px; box-sizing: border-box; font-size: 14px; display: block; }
-        label { font-weight: bold; color: var(--cafe-esc); display: block; margin-top: 10px; font-size: 14px; }
-        .btn-acao { width: 100%; padding: 12px; background: var(--cafe); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        body { font-family: 'Segoe UI', sans-serif; background: #fff; margin: 0; padding: 15px; }
+        .login-card { max-width: 350px; margin: 80px auto; padding: 30px; border: 2px solid var(--cafe); border-radius: 12px; text-align: center; }
+        input, textarea, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid var(--cafe); border-radius: 6px; box-sizing: border-box; font-size: 16px; }
+        button { width: 100%; padding: 12px; background: var(--cafe); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         .grid-leitos { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; margin-top: 15px; }
         .card-leito { background: #Fdf5f2; border: 1px solid #ddd; border-top: 4px solid var(--cafe); padding: 12px; border-radius: 8px; text-align: center; cursor: pointer; }
-        .check-container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; padding: 10px 0; }
-        .check-box { display: flex; align-items: center; gap: 8px; font-weight: normal; font-size: 12px; cursor: pointer; }
-        .check-box input { width: 16px; height: 16px; margin: 0; }
+        .check-container { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 10px 0; }
+        .check-box { display: flex; align-items: center; gap: 8px; font-weight: normal; font-size: 13px; cursor: pointer; }
         .nav-tabs { display: flex; gap: 5px; margin-bottom: 15px; border-bottom: 2px solid #eee; overflow-x: auto; }
         .nav-tab { padding: 10px; cursor: pointer; font-weight: bold; color: var(--cafe); white-space: nowrap; }
         .nav-tab.active { border-bottom: 3px solid var(--cafe-esc); color: var(--cafe-esc); }
         #sistema-completo, #painel-editor, .secao-aba { display: none; }
-        .header-leito { background: var(--cafe-esc); color: white; padding: 10px; border-radius: 6px; margin-bottom: 15px; font-size: 18px; font-weight: bold; }
+        .header-leito { background: var(--cafe-esc); color: white; padding: 10px; border-radius: 6px; margin-bottom: 15px; font-weight: bold; }
         .tabela-multi { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 10px; }
         .tabela-multi th, .tabela-multi td { border: 1px solid #333; padding: 8px; text-align: left; vertical-align: top; }
-        .tabela-multi th { background-color: #Fdf5f2; color: var(--cafe-esc); }
-        @media print {
-            @page { size: landscape; margin: 1cm; }
-            .nav-tabs, #painel-editor, select, .logo-hosp, .btn-acao, label, .grid-leitos, .login-card { display: none !important; }
+        @media print { 
+            .nav-tabs, #painel-editor, select, button, label, .grid-leitos, .login-card { display: none !important; }
             #sistema-completo, #aba-pas { display: block !important; }
-            body { padding: 0; }
+            @page { size: landscape; }
         }
     </style>
 </head>
 <body>
 
-<div id="tela-login-global" class="login-card">
-    <div class="logo-hosp">GESTÃO DE LEITOS UTI<br><span style="color:var(--cafe); font-size: 12px;">PSICOLOGIA HOSPITALAR</span></div>
-    <form onsubmit="event.preventDefault(); acionar_sistema_psi();">
-        <input type="password" id="pass_key_final" placeholder="Senha de Acesso" autocomplete="current-password" required>
-        <button type="submit" class="btn-acao">ENTRAR NO SISTEMA</button>
-    </form>
+<div id="tela-login" class="login-card">
+    <h2 style="color:var(--cafe-esc)">GESTÃO PSI</h2>
+    <input type="password" id="pass_input" placeholder="Senha: psi123">
+    <button onclick="entrar_agora()">ENTRAR</button>
 </div>
 
 <div id="sistema-completo">
-    <div class="logo-hosp">GESTÃO DE LEITOS UTI</div>
     <div class="nav-tabs">
-        <div class="nav-tab active" onclick="trocar_aba('mapa')">🗺️ MAPA</div>
-        <div class="nav-tab" onclick="trocar_aba('bol')">📢 BOLETIM</div>
-        <div class="nav-tab" onclick="trocar_aba('pen')">📌 PENDÊNCIAS</div>
-        <div class="nav-tab
+        <div class="nav-tab active" onclick="aba('mapa')">MAPA</div>
+        <div class="nav-tab" onclick="aba('bol')">BOLETIM</div>
+        <div class="nav-tab" onclick="aba('pen')">PENDÊNCIAS</div>
+        <div class="nav-tab" onclick="aba('pas')">VISITA MULTI</div>
+    </div>
+
+    <div id="aba-mapa" class="secao-aba" style="display: block;">
+        <select id="sel_uti" onchange="mapa()"></select>
+        <div class="grid-leitos" id="grid"></div>
+        <div id="painel-editor" style="margin-top: 20px; border-top: 1px solid #ccc; padding-top: 10px;">
+            <div id="tit-leito" class="header-leito">LEITO</div>
+            <label>Paciente:</label><input type="text" id="ed_n">
+            <label>Marcadores:</label>
+            <div class="check-container">
+                <label class="check-box"><input type="checkbox" id="c_vm"> VM</label>
+                <label class="check-box"><input type="checkbox" id="c_del"> DELIRIUM</label>
+                <label class="check-box"><input type="checkbox" id="c_iso"> ISOLAMENTO</label>
+                <label class="check-box"><input type="checkbox" id="c_cf"> CONFERÊNCIA</label>
+                <label class="check-box"><input type="checkbox" id="c_alta"> ALTA</label>
+                <label class
