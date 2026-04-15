@@ -14,8 +14,10 @@
         button { width: 100%; padding: 12px; background: var(--cafe); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; margin-top: 15px; }
         .card { background: #Fdf5f2; border: 1px solid #ddd; border-top: 4px solid var(--cafe); padding: 12px; border-radius: 8px; text-align: center; cursor: pointer; }
-        .check-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; font-size: 12px; padding: 10px 0; }
-        .check-item { display: flex; align-items: center; gap: 5px; font-weight: normal; color: black; margin-top: 0; }
+        /* AJUSTE DAS PENDÊNCIAS: AGORA ALINHADO */
+        .check-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 10px 0; }
+        .check-item { display: flex; align-items: center; gap: 8px; font-weight: normal; color: black; font-size: 13px; cursor: pointer; }
+        .check-item input { width: auto; margin: 0; }
         .tabs { display: flex; gap: 5px; margin-bottom: 15px; border-bottom: 2px solid #eee; overflow-x: auto; }
         .tab { padding: 10px; cursor: pointer; font-weight: bold; color: var(--cafe); white-space: nowrap; }
         .tab.active { border-bottom: 3px solid var(--cafe-esc); color: var(--cafe-esc); }
@@ -37,10 +39,10 @@
 <div id="app-content">
     <div class="logo">PLANTÃO <span style="color:var(--cafe)">PSI</span></div>
     <div class="tabs">
-        <div class="tab active" id="tab-m" onclick="switchTab('mapa')">🗺️ MAPA</div>
-        <div class="tab" id="tab-p" onclick="switchTab('pen')">📌 PENDÊNCIAS</div>
-        <div class="tab" id="tab-a" onclick="switchTab('alt')">🚪 ALTAS</div>
-        <div class="tab" id="tab-x" onclick="switchTab('pas')">🖨️ PASSAGEM</div>
+        <div class="tab active" onclick="switchTab('mapa')">🗺️ MAPA</div>
+        <div class="tab" onclick="switchTab('pen')">📌 PENDÊNCIAS</div>
+        <div class="tab" onclick="switchTab('alt')">🚪 ALTAS</div>
+        <div class="tab" onclick="switchTab('pas')">🖨️ PASSAGEM</div>
     </div>
 
     <div id="aba-mapa" class="aba-view" style="display: block;">
@@ -48,8 +50,10 @@
         <div class="grid" id="mapa"></div>
         <div id="editor" style="margin-top: 25px; border-top: 2px solid #eee; padding-top: 15px;">
             <div id="nome-topo" class="titulo-leito">LEITO</div>
+            
             <label>Nome do Paciente:</label>
             <input type="text" id="p-nome" placeholder="Digite o nome completo" oninput="atualizarNomeTopo()">
+            
             <label>Marcadores Clínicos:</label>
             <div class="check-grid">
                 <label class="check-item"><input type="checkbox" id="p-vm"> VM</label>
@@ -61,15 +65,20 @@
                 <label class="check-item"><input type="checkbox" id="p-poi"> POI</label>
                 <label class="check-item"><input type="checkbox" id="p-alta"> ALTA</label>
             </div>
-            <label>Lista de Problemas / Diagnósticos:</label>
+
+            <label>Lista de Problemas:</label>
             <textarea id="p-prob" rows="2"></textarea>
-            <label>História Médica / Evolução Clínica:</label>
+            
+            <label>História / Evolução:</label>
             <textarea id="p-hist" rows="4"></textarea>
+            
             <label>Exame das Funções Psíquicas:</label>
             <textarea id="p-psiq" rows="4"></textarea>
-            <label>Manejo e Conduta Psicológica:</label>
+            
+            <label>Manejo e Conduta:</label>
             <textarea id="p-cond" rows="4"></textarea>
-            <label>📌 Pendências para o Plantão:</label>
+            
+            <label>📌 Pendências:</label>
             <div class="check-grid">
                 <label class="check-item"><input type="checkbox" id="pen-f"> Falar com Família</label>
                 <label class="check-item"><input type="checkbox" id="pen-e"> Discutir Equipe</label>
@@ -79,7 +88,7 @@
                 <label class="check-item"><input type="checkbox" id="pen-h"> Fechamento Alta</label>
             </div>
             <textarea id="p-obs" rows="2" placeholder="Outras pendências..."></textarea>
-            <button onclick="salvar()">💾 SALVAR DADOS</button>
+            <button onclick="salvar()">💾 SALVAR NO LEITO</button>
         </div>
     </div>
 
@@ -90,7 +99,7 @@
 
 <script>
     const unds = { "UCV 1": ["1","2","3","4","5","6","7"], "UCV 2": ["10","11","12","13","14","15","16","17","40","41"], "UCV 3": ["18","19","20","21","22","23","24","25","26","27","28","29","30","31","32"], "UCV 4": ["33","34","35","36","37","38","39"] };
-    let db = JSON.parse(localStorage.getItem('psi_final_v5')) || {};
+    let db = JSON.parse(localStorage.getItem('psi_final_v6')) || {};
     let foco = null;
 
     function logar() {
@@ -121,7 +130,7 @@
 
     function abrir(l) {
         foco = l;
-        const p = db[l] || {n:"", prob:"", h:"", psiq:"", c:"", obs:"", vm:0, esp:0, del:0, iso:0, cp:0, cf:0, poi:0, alta:0, pf:0, pe:0, pa:0, pl:0, pt:0, ph:0};
+        const p = db[l] || {n:"", prob:"", h:"", psiq:"", c:"", obs:"", vm:false, esp:false, del:false, iso:false, cp:false, cf:false, poi:false, alta:false, pf:false, pe:false, pa:false, pl:false, pt:false, ph:false};
         document.getElementById('p-nome').value = p.n;
         document.getElementById('p-prob').value = p.prob;
         document.getElementById('p-hist').value = p.h;
@@ -160,7 +169,7 @@
             pa: document.getElementById('pen-a').checked, pl: document.getElementById('pen-l').checked,
             pt: document.getElementById('pen-t').checked, ph: document.getElementById('pen-h').checked
         };
-        localStorage.setItem('psi_final_v5', JSON.stringify(db));
+        localStorage.setItem('psi_final_v6', JSON.stringify(db));
         document.getElementById('editor').style.display = 'none';
         renderMapa();
         alert("Salvo!");
@@ -178,7 +187,7 @@
     function renderPassagem() {
         let h = '<table><tr><th>L</th><th>Paciente / Problemas</th><th>Clínica</th><th>Evolução / Exame</th><th>Conduta</th></tr>';
         for(let l in db) if(db[l].n) {
-            let cl = []; if(db[l].vm) cl.push("VM"); if(db[l].esp) cl.push("ESP"); if(db[l].del) cl.push("DEL"); if(db[l].cp) cl.push("CP");
+            let cl = []; if(db[l].vm) cl.push("VM"); if(db[l].esp) cl.push("ESP"); if(db[l].del) cl.push("DEL"); if(db[l].cp) cl.push("CP"); if(db[l].iso) cl.push("ISO");
             h += `<tr><td><b>${l}</b></td><td><b>${db[l].n}</b><br><small>${db[l].prob}</small></td><td>${cl.join(', ')}</td><td>${db[l].h}<br>---<br><b>EXAME:</b> ${db[l].psiq}</td><td>${db[l].c}</td></tr>`;
         }
         document.getElementById('tab-pas').innerHTML = h + '</table>';
@@ -187,7 +196,7 @@
     function renderAltas() {
         let h = '<ul>';
         for(let l in db) if(db[l].alta) h += `<li>Leito ${l}: ${db[l].n}</li>`;
-        document.getElementById('lista-alt').innerHTML = h + '</ul>';
+        document.getElementById('lista-alt').innerHTML = h || 'Nenhuma alta prevista.';
     }
 
     function renderPendencias() {
@@ -195,7 +204,7 @@
         for(let l in db) {
             let p = db[l]; let pens = [];
             if(p.pf) pens.push("Falar Família"); if(p.pe) pens.push("Equipe"); if(p.pa) pens.push("Avaliação"); if(p.pl) pens.push("Luto"); if(p.pt) pens.push("Testes"); if(p.ph) pens.push("Alta"); if(p.obs) pens.push(p.obs);
-            if(p.n && pens.length > 0) h += `<b>L${l} (${p.n}):</b> <ul>` + pens.map(i => `<li>${i}</li>`).join('') + `</ul>`;
+            if(p.n && pens.length > 0) h += `<div style="margin-bottom:10px"><b>Leito ${l} (${p.n}):</b><ul>` + pens.map(i => `<li>${i}</li>`).join('') + `</ul></div>`;
         }
         document.getElementById('lista-pen').innerHTML = h || 'Vazio';
     }
