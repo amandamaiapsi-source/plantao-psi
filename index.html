@@ -9,33 +9,29 @@
         body { font-family: 'Segoe UI', sans-serif; background: white; color: black; margin: 0; padding: 15px; }
         .logo { color: var(--cafe-esc); font-size: 24px; font-weight: bold; text-align: center; margin-bottom: 20px; }
         .login-container { max-width: 320px; margin: 80px auto; padding: 25px; border: 1px solid #ddd; border-radius: 12px; text-align: center; }
-        input, textarea, select { width: 100%; padding: 10px; margin: 5px 0 15px 0; border: 1px solid var(--cafe); border-radius: 6px; box-sizing: border-box; font-size: 14px; }
+        input, textarea, select { width: 100%; padding: 10px; margin: 5px 0 15px 0; border: 1px solid var(--cafe); border-radius: 6px; box-sizing: border-box; }
         label { font-weight: bold; color: var(--cafe-esc); font-size: 14px; display: block; margin-top: 10px; }
         button { width: 100%; padding: 12px; background: var(--cafe); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; margin-top: 15px; }
         .card { background: #Fdf5f2; border: 1px solid #ddd; border-top: 4px solid var(--cafe); padding: 12px; border-radius: 8px; text-align: center; cursor: pointer; min-height: 85px; }
         .check-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 10px 0; }
-        .check-item { display: flex; align-items: center; gap: 8px; font-weight: normal; font-size: 12px; cursor: pointer; }
         .tabs { display: flex; gap: 5px; margin-bottom: 15px; border-bottom: 2px solid #eee; overflow-x: auto; }
         .tab { padding: 10px; cursor: pointer; font-weight: bold; color: var(--cafe); white-space: nowrap; }
         .tab.active { border-bottom: 3px solid var(--cafe-esc); color: var(--cafe-esc); }
         #app-content, #editor, .aba-view { display: none; }
-        
-        /* TABELA DE IMPRESSÃO - FORÇA BRUTA */
-        .print-only { display: none; }
-        table { width: 100%; border-collapse: collapse; table-layout: fixed; margin-top: 20px; }
-        th, td { border: 1.5px solid black !important; padding: 8px !important; text-align: left; vertical-align: top; font-size: 10px; word-wrap: break-word; }
-        th { background-color: #f0f0f0 !important; font-weight: bold; }
 
-        @media print { 
-            @page { size: landscape; margin: 0.5cm; }
-            html, body { background: white !important; width: 100%; height: 100%; margin: 0 !important; padding: 0 !important; }
-            .tabs, #editor, select, .logo, button, label, h3, .grid, .login-container, .card, .header-uti { display: none !important; } 
-            .aba-view { display: none !important; }
-            #aba-pas { display: block !important; width: 100% !important; }
-            .print-only { display: block !important; font-size: 16px; font-weight: bold; margin-bottom: 10px; }
-            table { display: table !important; border: 1.5px solid black !important; }
-            td, th { border: 1.5px solid black !important; }
+        /* ESTILO DE IMPRESSÃO: TIPO FICHA (MAIS SEGURO) */
+        .print-box { display: none; border: 2px solid black; padding: 10px; margin-bottom: 15px; page-break-inside: avoid; }
+        .print-header { display: none; font-size: 20px; font-weight: bold; text-align: center; border-bottom: 2px solid black; margin-bottom: 20px; padding-bottom: 10px; }
+        .item-print { margin-bottom: 8px; font-size: 12px; }
+        .label-print { font-weight: bold; text-decoration: underline; }
+
+        @media print {
+            @page { size: portrait; margin: 1cm; }
+            .tabs, #editor, select, .logo, button, label, .grid, .login-container, .card, hr { display: none !important; }
+            #app-content, #aba-pas { display: block !important; }
+            .print-header, .print-box { display: block !important; }
+            body { padding: 0; background: white; }
         }
     </style>
 </head>
@@ -43,7 +39,7 @@
 
 <div id="login-screen" class="login-container">
     <div class="logo">PLANTÃO <span style="color:var(--cafe)">PSI</span></div>
-    <input type="password" id="pass" placeholder="Senha de Acesso">
+    <input type="password" id="pass" placeholder="Senha: psi123">
     <button onclick="logar()">ENTRAR</button>
 </div>
 
@@ -53,16 +49,47 @@
         <div class="tab active" onclick="switchTab('mapa')">🗺️ MAPA</div>
         <div class="tab" onclick="switchTab('bol')">📢 BOLETIM</div>
         <div class="tab" onclick="switchTab('pen')">📌 PENDÊNCIAS</div>
-        <div class="tab" onclick="switchTab('alt')">🚪 ALTAS</div>
         <div class="tab" onclick="switchTab('pas')">🖨️ IMPRIMIR</div>
     </div>
 
     <div id="aba-mapa" class="aba-view" style="display: block;">
-        <select id="sel-uti" onchange="renderMapa()" class="header-uti"></select>
+        <select id="sel-uti" onchange="renderMapa()"></select>
         <div class="grid" id="mapa"></div>
         <div id="editor" style="margin-top: 25px; border-top: 2px solid #eee; padding-top: 15px;">
             <div id="nome-topo" style="background:var(--cafe-esc);color:white;padding:10px;border-radius:6px;font-weight:bold;">LEITO</div>
-            <label>Paciente:</label>
-            <input type="text" id="p-nome" placeholder="Nome completo" oninput="atualizarNomeTopo()">
-            <label>Marcadores Clínicos:</label>
+            <label>Paciente:</label><input type="text" id="p-nome" oninput="atualizarNomeTopo()">
             <div class="check-grid">
+                <label><input type="checkbox" id="p-vm"> VM</label>
+                <label><input type="checkbox" id="p-esp"> ESP</label>
+                <label><input type="checkbox" id="p-del"> DEL</label>
+                <label><input type="checkbox" id="p-iso"> ISO</label>
+                <label><input type="checkbox" id="p-cp"> CP</label>
+                <label><input type="checkbox" id="p-alta"> ALTA</label>
+            </div>
+            <label>Problemas:</label><textarea id="p-prob" rows="2"></textarea>
+            <label>Evolução:</label><textarea id="p-hist" rows="4"></textarea>
+            <label>Exame Psíquico:</label><textarea id="p-psiq" rows="4"></textarea>
+            <label>Conduta:</label><textarea id="p-cond" rows="4"></textarea>
+            <label>Fechamento Alta:</label><textarea id="p-fech" rows="2"></textarea>
+            <label>Boletim:</label><textarea id="p-bol" rows="2"></textarea>
+            <label>Pendências:</label>
+            <div class="check-grid">
+                <label><input type="checkbox" id="pen-f"> Família</label>
+                <label><input type="checkbox" id="pen-b"> Boletim</label>
+                <label><input type="checkbox" id="pen-c"> CDI/TRC</label>
+            </div>
+            <textarea id="p-obs" rows="2" placeholder="Outras..."></textarea>
+            <button onclick="salvar()">💾 SALVAR</button>
+        </div>
+    </div>
+
+    <div id="aba-bol" class="aba-view"><h3>📢 Boletins</h3><div id="lista-bol"></div></div>
+    <div id="aba-pen" class="aba-view"><h3>📌 Pendências</h3><div id="lista-pen"></div></div>
+    <div id="aba-pas" class="aba-view">
+        <div id="print-h" class="print-header"></div>
+        <div id="relatorio-final"></div>
+    </div>
+</div>
+
+<script>
+    const unds = { "UCV 1": ["1","2","3","4","5","6","7"], "UCV 2": ["10","11","
