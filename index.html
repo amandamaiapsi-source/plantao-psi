@@ -27,9 +27,6 @@
         .c-iso { background: var(--iso) !important; border-top-color: #fbc02d !important; }
         .c-alta { background: var(--alta) !important; border-top-color: #fb8c00 !important; }
         .tag { font-size: 9px; font-weight: bold; display: block; margin-top: 2px; text-transform: uppercase; }
-        .check-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 10px 0; }
-        .check-item { display: flex; align-items: center; gap: 8px; font-size: 12px; cursor: pointer; }
-        .check-item input { width: 18px; height: 18px; }
         .tit-leito { background: var(--cafe-esc); color: white; padding: 10px; border-radius: 6px; font-weight: bold; margin-bottom: 15px; }
         table { width: 100%; border-collapse: collapse; font-size: 10px; margin-top: 10px; }
         th, td { border: 1px solid #000; padding: 5px; text-align: left; vertical-align: top; }
@@ -62,47 +59,40 @@
     <div id="aba-mapa" class="aba" style="display:block">
         <select id="uti" onchange="mapa()"></select>
         <div id="grade" class="grid"></div>
-        
         <div id="editor" style="margin-top:20px; border-top:2px solid #eee; padding-top:15px;">
             <div id="tl" class="tit-leito">LEITO</div>
-            <div style="display:flex; gap:10px;">
-                <div style="flex:3"><label>Paciente:</label><input type="text" id="n"></div>
-                <div style="flex:1"><label>Idade:</label><input type="text" id="id"></div>
-            </div>
+            <div style="display:flex; gap:10px;"><div style="flex:3"><label>Paciente:</label><input type="text" id="n"></div><div style="flex:1"><label>Idade:</label><input type="text" id="id"></div></div>
             <label>Código Smart:</label><input type="text" id="sm">
-            
             <label>Marcadores Clínicos:</label>
-            <div class="check-grid">
-                <label class="check-item"><input type="checkbox" id="m_vm"> 🔵 VM / Sedação</label>
-                <label class="check-item"><input type="checkbox" id="m_del"> 🔴 Delirium</label>
-                <label class="check-item"><input type="checkbox" id="m_pal"> 🟣 Paliativo</label>
-                <label class="check-item"><input type="checkbox" id="m_iso"> 🟡 Isolamento</label>
-                <label class="check-item"><input type="checkbox" id="m_alta"> 🟠 Alta</label>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
+                <label><input type="checkbox" id="m_vm"> 🔵 VM/Sedação</label>
+                <label><input type="checkbox" id="m_del"> 🔴 Delirium</label>
+                <label><input type="checkbox" id="m_pal"> 🟣 Paliativo</label>
+                <label><input type="checkbox" id="m_iso"> 🟡 Isolamento</label>
+                <label><input type="checkbox" id="m_alta"> 🟠 Alta</label>
             </div>
-
-            <label>Lista de Problemas (Diagnósticos):</label><textarea id="pr" rows="2"></textarea>
-            <label>História e Evolução:</label><textarea id="ev" rows="3"></textarea>
-            <label>Avaliação das Funções Psíquicas:</label><textarea id="ps" rows="3"></textarea>
-            <label>Manejo e Conduta:</label><textarea id="co" rows="3"></textarea>
-            <label>Informações do Boletim:</label><textarea id="bo" rows="2"></textarea>
-            
-            <label>📌 Pendências e Vigilância Clínica:</label>
-            <div class="check-grid">
-                <label class="check-item"><input type="checkbox" id="p_desp"> Avaliar Despertar</label>
-                <label class="check-item"><input type="checkbox" id="p_vig"> Vigilância Delirium</label>
-                <label class="check-item"><input type="checkbox" id="p_conf"> Conferência Familiar</label>
-                <label class="check-item"><input type="checkbox" id="p_luto"> Suporte ao Luto</label>
-                <label class="check-item"><input type="checkbox" id="p_v_inf"> Visita Infantil</label>
-                <label class="check-item"><input type="checkbox" id="p_f"> Falar Família</label>
+            <label>Problemas:</label><textarea id="pr" rows="2"></textarea>
+            <label>História/Evolução:</label><textarea id="ev" rows="3"></textarea>
+            <label>Psíquico:</label><textarea id="ps" rows="3"></textarea>
+            <label>Conduta:</label><textarea id="co" rows="3"></textarea>
+            <label>Boletim:</label><textarea id="bo" rows="2"></textarea>
+            <label>Pendências:</label>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
+                <label><input type="checkbox" id="p_desp"> Avaliar Despertar</label>
+                <label><input type="checkbox" id="p_vig"> Vig. Delirium</label>
+                <label><input type="checkbox" id="p_conf"> Conf. Familiar</label>
+                <label><input type="checkbox" id="p_luto"> Suporte Luto</label>
+                <label><input type="checkbox" id="p_v_inf"> V. Infantil</label>
+                <label><input type="checkbox" id="p_f"> Falar Família</label>
             </div>
-            <textarea id="ob" rows="2" placeholder="Outras pendências..."></textarea>
-            <button class="btn" onclick="salvar()">💾 SALVAR DADOS NO LEITO</button>
+            <textarea id="ob" rows="2" placeholder="Outras..."></textarea>
+            <button class="btn" onclick="salvar()">💾 SALVAR NO LEITO</button>
         </div>
     </div>
 
     <div id="aba-bol" class="aba"><h3 class="tit-aba">📢 Boletins</h3><div id="v_bol"></div></div>
     <div id="aba-pen" class="aba"><h3 class="tit-aba">📌 Pendências</h3><div id="v_pen"></div></div>
-    <div id="aba-multi" class="aba"><h2 style="text-align:center" id="titulo_multi">VISITA MULTI</h2><div id="v_multi"></div></div>
+    <div id="aba-multi" class="aba"><div id="area_impressao_limpa"></div></div>
 </div>
 
 <script>
@@ -150,7 +140,6 @@
         document.getElementById('p_v_inf').checked = p.pvinf||0; document.getElementById('p_desp').checked = p.pdesp||0;
         document.getElementById('p_vig').checked = p.pvig||0; document.getElementById('p_luto').checked = p.pluto||0;
         document.getElementById('editor').style.display = 'block';
-        window.scrollTo(0, document.getElementById('editor').offsetTop);
     }
 
     function salvar() {
@@ -180,22 +169,18 @@
     }
 
     function renderMulti() {
-        const utiSelecionada = document.getElementById('uti').value;
-        const listaLeitosUti = ucvs[utiSelecionada];
-        document.getElementById('titulo_multi').innerText = "VISITA MULTI - " + utiSelecionada;
-        
-        let h = '<table class="tabela-multi"><thead><tr><th>L</th><th>Paciente (Idade)</th><th>Smart</th><th>Clínica</th><th>Problemas</th><th>Evolução</th><th>Psíquico</th><th>Conduta</th></tr></thead><tbody>';
-        
-        listaLeitosUti.forEach(l => {
+        const utiSel = document.getElementById('uti').value;
+        const leitosUti = ucvs[utiSel];
+        let h = `<h2 style="text-align:center">VISITA MULTI - ${utiSel}</h2>`;
+        h += '<table class="tabela-multi"><thead><tr><th>L</th><th>Paciente (Idade)</th><th>Smart</th><th>Clínica</th><th>Problemas</th><th>Evolução</th><th>Psíquico</th><th>Conduta</th></tr></thead><tbody>';
+        leitosUti.forEach(l => {
             if(db[l] && db[l].n) {
-                let p = db[l]; 
-                let cl = []; 
-                if(p.vm) cl.push("VM/SED"); if(p.del) cl.push("DEL"); if(p.pal) cl.push("PAL");
+                let p = db[l]; let cl = []; if(p.vm) cl.push("VM/SED"); if(p.del) cl.push("DEL"); if(p.pal) cl.push("PAL");
                 h += `<tr><td>${l}</td><td>${p.n} (${p.id})</td><td>${p.sm}</td><td>${cl.join(', ')}</td><td>${p.pr}</td><td>${p.ev}</td><td>${p.ps}</td><td>${p.co}</td></tr>`;
             }
         });
-        
-        document.getElementById('v_multi').innerHTML = h + '</tbody></table><button class="btn" onclick="window.print()" style="margin-top:20px">🖨️ IMPRIMIR TABELA</button>';
+        h += '</tbody></table><button class="btn" onclick="window.print()" style="margin-top:20px">🖨️ IMPRIMIR TABELA</button>';
+        document.getElementById('area_impressao_limpa').innerHTML = h;
     }
 
     function renderPen() {
@@ -211,18 +196,10 @@
                 if(p.n && (pens.length || p.ob)) h += `<b>L${l} (${p.n}):</b> ${pens.join(', ')} ${p.ob ? '- '+p.ob : ''}<br><hr>`;
             }
         });
-        document.getElementById('v_pen').innerHTML = h || 'Nenhuma pendência na unidade selecionada.';
+        document.getElementById('v_pen').innerHTML = h || 'Vazio';
     }
 
     function renderBol() {
         const utiSel = document.getElementById('uti').value;
         const leitosUti = ucvs[utiSel];
         let h = '';
-        leitosUti.forEach(l => {
-            if(db[l] && db[l].bo) h += `<b>L${l}:</b> ${db[l].bo}<br><hr>`;
-        });
-        document.getElementById('v_bol').innerHTML = h || 'Nenhum boletim registrado nesta unidade.';
-    }
-</script>
-</body>
-</html>
