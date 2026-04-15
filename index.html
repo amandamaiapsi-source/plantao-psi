@@ -5,15 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GESTÃO PSI - AMANDA MAIA</title>
     <style>
-        :root { 
-            --cafe: #8D6E63; --cafe-esc: #4E342E;
-            --vm: #bbdefb; --del: #ffcdd2; --pal: #e1bee7; 
-            --iso: #fff9c4; --alta: #ffe0b2;
-        }
+        :root { --cafe: #8D6E63; --cafe-esc: #4E342E; --vm: #bbdefb; --del: #ffcdd2; --pal: #e1bee7; --iso: #fff9c4; --alta: #ffe0b2; }
         body { font-family: 'Segoe UI', sans-serif; background: #fff; margin: 0; padding: 15px; }
         .login-box { max-width: 350px; margin: 80px auto; padding: 30px; border: 2px solid var(--cafe); border-radius: 12px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         input, textarea, select { width: 100%; padding: 10px; margin: 5px 0 15px 0; border: 1px solid var(--cafe); border-radius: 6px; box-sizing: border-box; font-size: 14px; }
-        label { font-weight: bold; color: var(--cafe-esc); display: block; margin-top: 10px; font-size: 14px; }
         .btn { width: 100%; padding: 12px; background: var(--cafe); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
         #app, .aba, #editor { display: none; }
         .tabs { display: flex; gap: 5px; border-bottom: 2px solid #eee; margin-bottom: 15px; overflow-x: auto; }
@@ -27,13 +22,12 @@
         .c-iso { background: var(--iso) !important; border-top-color: #fbc02d !important; }
         .c-alta { background: var(--alta) !important; border-top-color: #fb8c00 !important; }
         .tag { font-size: 9px; font-weight: bold; display: block; margin-top: 2px; text-transform: uppercase; }
-        .tit-leito { background: var(--cafe-esc); color: white; padding: 10px; border-radius: 6px; font-weight: bold; margin-bottom: 15px; }
         table { width: 100%; border-collapse: collapse; font-size: 10px; margin-top: 10px; }
         th, td { border: 1px solid #000; padding: 5px; text-align: left; vertical-align: top; }
         @media print { 
             .tabs, #editor, button, label, .grid, .login-box, select, h3, .tit-aba { display: none !important; } 
-            #aba-multi { display: block !important; }
-            .tabela-multi { display: table !important; width: 100% !important; }
+            #aba-multi, #area_impressao { display: block !important; }
+            table { display: table !important; width: 100% !important; }
             @page { size: landscape; margin: 0.5cm; }
         }
     </style>
@@ -42,10 +36,8 @@
 
 <div id="login" class="login-box">
     <h2 style="color:var(--cafe-esc)">GESTÃO PSI</h2>
-    <form onsubmit="event.preventDefault(); dispararAcessoTotal();">
-        <input type="password" id="sk_key_2026" placeholder="Senha de Acesso" required>
-        <button type="submit" class="btn">ENTRAR NO SISTEMA</button>
-    </form>
+    <input type="password" id="sk_key" placeholder="Senha: psi123">
+    <button class="btn" onclick="entrar()">ENTRAR</button>
 </div>
 
 <div id="app">
@@ -60,146 +52,9 @@
         <select id="uti" onchange="mapa()"></select>
         <div id="grade" class="grid"></div>
         <div id="editor" style="margin-top:20px; border-top:2px solid #eee; padding-top:15px;">
-            <div id="tl" class="tit-leito">LEITO</div>
-            <div style="display:flex; gap:10px;"><div style="flex:3"><label>Paciente:</label><input type="text" id="n"></div><div style="flex:1"><label>Idade:</label><input type="text" id="id"></div></div>
-            <label>Código Smart:</label><input type="text" id="sm">
-            <label>Marcadores Clínicos:</label>
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
-                <label><input type="checkbox" id="m_vm"> 🔵 VM/Sedação</label>
+            <div id="tl" style="background:var(--cafe-esc); color:white; padding:10px; border-radius:6px; font-weight:bold; margin-bottom:10px;">LEITO</div>
+            <div style="display:flex; gap:10px;"><input type="text" id="n" placeholder="Paciente"><input type="text" id="id" placeholder="Idade"></div>
+            <input type="text" id="sm" placeholder="Código Smart">
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; font-size:12px;">
+                <label><input type="checkbox" id="m_vm"> 🔵 VM/Sed</label>
                 <label><input type="checkbox" id="m_del"> 🔴 Delirium</label>
-                <label><input type="checkbox" id="m_pal"> 🟣 Paliativo</label>
-                <label><input type="checkbox" id="m_iso"> 🟡 Isolamento</label>
-                <label><input type="checkbox" id="m_alta"> 🟠 Alta</label>
-            </div>
-            <label>Problemas:</label><textarea id="pr" rows="2"></textarea>
-            <label>História/Evolução:</label><textarea id="ev" rows="3"></textarea>
-            <label>Psíquico:</label><textarea id="ps" rows="3"></textarea>
-            <label>Conduta:</label><textarea id="co" rows="3"></textarea>
-            <label>Boletim:</label><textarea id="bo" rows="2"></textarea>
-            <label>Pendências:</label>
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
-                <label><input type="checkbox" id="p_desp"> Avaliar Despertar</label>
-                <label><input type="checkbox" id="p_vig"> Vig. Delirium</label>
-                <label><input type="checkbox" id="p_conf"> Conf. Familiar</label>
-                <label><input type="checkbox" id="p_luto"> Suporte Luto</label>
-                <label><input type="checkbox" id="p_v_inf"> V. Infantil</label>
-                <label><input type="checkbox" id="p_f"> Falar Família</label>
-            </div>
-            <textarea id="ob" rows="2" placeholder="Outras..."></textarea>
-            <button class="btn" onclick="salvar()">💾 SALVAR NO LEITO</button>
-        </div>
-    </div>
-
-    <div id="aba-bol" class="aba"><h3 class="tit-aba">📢 Boletins</h3><div id="v_bol"></div></div>
-    <div id="aba-pen" class="aba"><h3 class="tit-aba">📌 Pendências</h3><div id="v_pen"></div></div>
-    <div id="aba-multi" class="aba"><div id="area_impressao_limpa"></div></div>
-</div>
-
-<script>
-    const ucvs = { "UCV 1": ["1","2","3","4","5","6","7"], "UCV 2": ["10","11","12","13","14","15","16","17","40","41"], "UCV 3": ["18","19","20","21","22","23","24","25","26","27","28","29","30","31","32"], "UCV 4": ["33","34","35","36","37","38","39"] };
-    let db = JSON.parse(localStorage.getItem('DB_PSI_V2026_CLINICO')) || {};
-    let fl = null;
-
-    function dispararAcessoTotal() {
-        if(document.getElementById('sk_key_2026').value === "psi123") {
-            document.getElementById('login').style.display = 'none';
-            document.getElementById('app').style.display = 'block';
-            const s = document.getElementById('uti'); s.innerHTML = '';
-            for(let u in ucvs) s.innerHTML += `<option value="${u}">${u}</option>`;
-            mapa();
-        } else { alert("Senha incorreta"); }
-    }
-
-    function mapa() {
-        const u = document.getElementById('uti').value;
-        const g = document.getElementById('grade'); g.innerHTML = '';
-        ucvs[u].forEach(l => {
-            const p = db[l] || {};
-            let c = "card"; let t = "";
-            if(p.vm) { c += " c-vm"; t += "<span class='tag'>🔵 VM/SED</span>"; }
-            if(p.del) { c += " c-del"; t += "<span class='tag'>🔴 DELIRIUM</span>"; }
-            if(p.pal) { c += " c-pal"; t += "<span class='tag'>🟣 CP</span>"; }
-            if(p.iso) { c += " c-iso"; t += "<span class='tag'>🟡 ISO</span>"; }
-            if(p.alta) { c += " c-alta"; t += "<span class='tag'>🟠 ALTA</span>"; }
-            g.innerHTML += `<div class="${c}" onclick="abrir('${l}')"><b>L${l}</b><br><small>${p.n || 'Vazio'}</small>${t}</div>`;
-        });
-    }
-
-    function abrir(l) {
-        fl = l; const p = db[l] || {};
-        document.getElementById('tl').innerText = "LEITO " + l;
-        document.getElementById('n').value = p.n||""; document.getElementById('id').value = p.id||"";
-        document.getElementById('sm').value = p.sm||""; document.getElementById('pr').value = p.pr||"";
-        document.getElementById('ev').value = p.ev||""; document.getElementById('ps').value = p.ps||"";
-        document.getElementById('co').value = p.co||""; document.getElementById('bo').value = p.bo||"";
-        document.getElementById('ob').value = p.ob||"";
-        document.getElementById('m_vm').checked = p.vm||0; document.getElementById('m_del').checked = p.del||0;
-        document.getElementById('m_pal').checked = p.pal||0; document.getElementById('m_iso').checked = p.iso||0;
-        document.getElementById('m_alta').checked = p.alta||0;
-        document.getElementById('p_f').checked = p.pf||0; document.getElementById('p_conf').checked = p.pconf||0;
-        document.getElementById('p_v_inf').checked = p.pvinf||0; document.getElementById('p_desp').checked = p.pdesp||0;
-        document.getElementById('p_vig').checked = p.pvig||0; document.getElementById('p_luto').checked = p.pluto||0;
-        document.getElementById('editor').style.display = 'block';
-    }
-
-    function salvar() {
-        db[fl] = {
-            n: document.getElementById('n').value, id: document.getElementById('id').value,
-            sm: document.getElementById('sm').value, pr: document.getElementById('pr').value,
-            ev: document.getElementById('ev').value, ps: document.getElementById('ps').value,
-            co: document.getElementById('co').value, bo: document.getElementById('bo').value,
-            ob: document.getElementById('ob').value, vm: document.getElementById('m_vm').checked,
-            del: document.getElementById('m_del').checked, pal: document.getElementById('m_pal').checked,
-            iso: document.getElementById('m_iso').checked, alta: document.getElementById('m_alta').checked,
-            pf: document.getElementById('p_f').checked, pconf: document.getElementById('p_conf').checked,
-            pvinf: document.getElementById('p_v_inf').checked, pdesp: document.getElementById('p_desp').checked,
-            pvig: document.getElementById('p_vig').checked, pluto: document.getElementById('p_luto').checked
-        };
-        localStorage.setItem('DB_PSI_V2026_CLINICO', JSON.stringify(db));
-        document.getElementById('editor').style.display = 'none'; mapa();
-    }
-
-    function ver(t) {
-        document.querySelectorAll('.aba').forEach(a => a.style.display = 'none');
-        document.getElementById('aba-' + t).style.display = 'block';
-        document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
-        if(t === 'multi') renderMulti();
-        if(t === 'pen') renderPen();
-        if(t === 'bol') renderBol();
-    }
-
-    function renderMulti() {
-        const utiSel = document.getElementById('uti').value;
-        const leitosUti = ucvs[utiSel];
-        let h = `<h2 style="text-align:center">VISITA MULTI - ${utiSel}</h2>`;
-        h += '<table class="tabela-multi"><thead><tr><th>L</th><th>Paciente (Idade)</th><th>Smart</th><th>Clínica</th><th>Problemas</th><th>Evolução</th><th>Psíquico</th><th>Conduta</th></tr></thead><tbody>';
-        leitosUti.forEach(l => {
-            if(db[l] && db[l].n) {
-                let p = db[l]; let cl = []; if(p.vm) cl.push("VM/SED"); if(p.del) cl.push("DEL"); if(p.pal) cl.push("PAL");
-                h += `<tr><td>${l}</td><td>${p.n} (${p.id})</td><td>${p.sm}</td><td>${cl.join(', ')}</td><td>${p.pr}</td><td>${p.ev}</td><td>${p.ps}</td><td>${p.co}</td></tr>`;
-            }
-        });
-        h += '</tbody></table><button class="btn" onclick="window.print()" style="margin-top:20px">🖨️ IMPRIMIR TABELA</button>';
-        document.getElementById('area_impressao_limpa').innerHTML = h;
-    }
-
-    function renderPen() {
-        const utiSel = document.getElementById('uti').value;
-        const leitosUti = ucvs[utiSel];
-        let h = '';
-        leitosUti.forEach(l => {
-            if(db[l]) {
-                let p = db[l]; let pens = [];
-                if(p.pdesp) pens.push("Avaliar Despertar"); if(p.pvig) pens.push("Vigilância Delirium");
-                if(p.pconf) pens.push("Conf. Familiar"); if(p.pluto) pens.push("Suporte Luto");
-                if(p.pvinf) pens.push("Visita Infantil"); if(p.pf) pens.push("Falar Família");
-                if(p.n && (pens.length || p.ob)) h += `<b>L${l} (${p.n}):</b> ${pens.join(', ')} ${p.ob ? '- '+p.ob : ''}<br><hr>`;
-            }
-        });
-        document.getElementById('v_pen').innerHTML = h || 'Vazio';
-    }
-
-    function renderBol() {
-        const utiSel = document.getElementById('uti').value;
-        const leitosUti = ucvs[utiSel];
-        let h = '';
