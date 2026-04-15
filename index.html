@@ -7,26 +7,35 @@
     <style>
         :root { --cafe: #8D6E63; --cafe-esc: #4E342E; }
         body { font-family: 'Segoe UI', sans-serif; background: #fff; color: #000; margin: 0; padding: 15px; }
-        .logo-hosp { color: var(--cafe-esc); font-size: 20px; font-weight: bold; text-align: center; margin-bottom: 20px; text-transform: uppercase; }
+        .logo-hosp { color: var(--cafe-esc); font-size: 18px; font-weight: bold; text-align: center; margin-bottom: 20px; text-transform: uppercase; }
         .login-card { max-width: 350px; margin: 80px auto; padding: 30px; border: 1px solid #ddd; border-radius: 12px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        input, textarea, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid var(--cafe); border-radius: 6px; box-sizing: border-box; font-size: 14px; }
-        label { font-weight: bold; color: var(--cafe-esc); display: block; margin-top: 12px; font-size: 14px; }
+        input, textarea, select { width: 100%; padding: 10px; margin: 5px 0 15px 0; border: 1px solid var(--cafe); border-radius: 6px; box-sizing: border-box; font-size: 14px; display: block; }
+        label { font-weight: bold; color: var(--cafe-esc); display: block; margin-top: 10px; font-size: 14px; }
         .btn-acao { width: 100%; padding: 12px; background: var(--cafe); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         .grid-leitos { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; margin-top: 15px; }
-        .card-leito { background: #Fdf5f2; border: 1px solid #ddd; border-top: 4px solid var(--cafe); padding: 12px; border-radius: 8px; text-align: center; cursor: pointer; min-height: 85px; }
+        .card-leito { background: #Fdf5f2; border: 1px solid #ddd; border-top: 4px solid var(--cafe); padding: 12px; border-radius: 8px; text-align: center; cursor: pointer; }
+        
+        /* AJUSTE DOS BOTÕES TRONCHOS */
         .check-container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 10px 0; }
-        .check-box { display: flex; align-items: center; gap: 8px; font-weight: normal; font-size: 12px; cursor: pointer; }
-        .check-box input { width: auto; margin: 0; }
+        .check-box { display: flex; align-items: center; gap: 8px; font-weight: normal; font-size: 13px; cursor: pointer; margin: 0; }
+        .check-box input { width: auto; margin: 0; display: inline-block; }
+
         .nav-tabs { display: flex; gap: 5px; margin-bottom: 15px; border-bottom: 2px solid #eee; overflow-x: auto; }
         .nav-tab { padding: 10px; cursor: pointer; font-weight: bold; color: var(--cafe); white-space: nowrap; }
         .nav-tab.active { border-bottom: 3px solid var(--cafe-esc); color: var(--cafe-esc); }
         #sistema-completo, #painel-editor, .secao-aba { display: none; }
         .header-leito { background: var(--cafe-esc); color: white; padding: 10px; border-radius: 6px; margin-bottom: 15px; font-size: 18px; font-weight: bold; }
-        .box-print { display: none; border: 1.5px solid #000; padding: 10px; margin-bottom: 15px; page-break-inside: avoid; }
+        
+        /* TABELA PARA VISITA MULTI */
+        .tabela-multi { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 10px; }
+        .tabela-multi th, .tabela-multi td { border: 1px solid #333; padding: 8px; text-align: left; vertical-align: top; }
+        .tabela-multi th { background-color: #Fdf5f2; color: var(--cafe-esc); }
+
         @media print {
-            @page { size: portrait; margin: 1cm; }
+            @page { size: landscape; margin: 1cm; }
             .nav-tabs, #painel-editor, select, .logo-hosp, .btn-acao, label, .grid-leitos, .login-card { display: none !important; }
-            #sistema-completo, #aba-passagem, .box-print { display: block !important; }
+            #sistema-completo, #aba-pas { display: block !important; }
+            .tabela-multi { font-size: 10px; }
             body { padding: 0; }
         }
     </style>
@@ -34,8 +43,8 @@
 <body>
 
 <div id="tela-entrada" class="login-card">
-    <div class="logo-hosp">GESTÃO DE LEITOS UTI<br><span style="color:var(--cafe); font-size: 14px;">PSICOLOGIA HOSPITALAR</span></div>
-    <input type="password" id="campo_senha_final" placeholder="Digite a senha" onkeypress="if(event.key==='Enter') liberar_acesso_total()">
+    <div class="logo-hosp">GESTÃO DE LEITOS UTI<br><span style="color:var(--cafe); font-size: 12px;">PSICOLOGIA HOSPITALAR</span></div>
+    <input type="password" id="campo_senha_final" placeholder="Senha: psi123" onkeypress="if(event.key==='Enter') liberar_acesso_total()">
     <button class="btn-acao" onclick="liberar_acesso_total()">ENTRAR NO SISTEMA</button>
 </div>
 
@@ -45,8 +54,7 @@
         <div class="nav-tab active" onclick="trocar_aba('mapa')">🗺️ MAPA</div>
         <div class="nav-tab" onclick="trocar_aba('bol')">📢 BOLETIM</div>
         <div class="nav-tab" onclick="trocar_aba('pen')">📌 PENDÊNCIAS</div>
-        <div class="nav-tab" onclick="trocar_aba('alt')">🚪 ALTAS</div>
-        <div class="nav-tab" onclick="trocar_aba('pas')">🖨️ IMPRIMIR</div>
+        <div class="nav-tab" onclick="trocar_aba('pas')">📋 VISITA MULTI (TABELA)</div>
     </div>
 
     <div id="aba-mapa" class="secao-aba" style="display: block;">
@@ -62,15 +70,15 @@
                 <label class="check-box"><input type="checkbox" id="c_vm"> VM</label>
                 <label class="check-box"><input type="checkbox" id="c_esp"> ESPONTÂNEA</label>
                 <label class="check-box"><input type="checkbox" id="c_del"> DELIRIUM</label>
-                <label class="check-item"><input type="checkbox" id="c_iso"> ISOLAMENTO</label>
+                <label class="check-box"><input type="checkbox" id="c_iso"> ISOLAMENTO</label>
                 <label class="check-box"><input type="checkbox" id="c_cp"> PALIATIVO</label>
-                <label class="check-box"><input type="checkbox" id="c_alta"> ALTA</label>
+                <label class="check-item"><input type="checkbox" id="c_alta"> ALTA</label>
             </div>
 
             <label>Lista de Problemas:</label><textarea id="edit_prob" rows="2"></textarea>
-            <label>Evolução Clínica:</label><textarea id="edit_evo" rows="4"></textarea>
-            <label>Exame das Funções Psíquicas:</label><textarea id="edit_psiq" rows="4"></textarea>
-            <label>Manejo e Conduta:</label><textarea id="edit_cond" rows="4"></textarea>
+            <label>Evolução Clínica:</label><textarea id="edit_evo" rows="3"></textarea>
+            <label>Exame Psíquico:</label><textarea id="edit_psiq" rows="3"></textarea>
+            <label>Manejo e Conduta:</label><textarea id="edit_cond" rows="3"></textarea>
             <label>Fechamento de Alta:</label><textarea id="edit_fech" rows="2"></textarea>
             <label>Informações do Boletim:</label><textarea id="edit_bol" rows="2"></textarea>
 
@@ -82,16 +90,129 @@
                 <label class="check-box"><input type="checkbox" id="p_vinf"> V. Infantil</label>
                 <label class="check-box"><input type="checkbox" id="p_vest"> V. Estendida</label>
             </div>
-            <textarea id="edit_obs" rows="2" placeholder="Outras pendências..."></textarea>
-            <button class="btn-acao" onclick="gravar_leito()">💾 SALVAR DADOS NO LEITO</button>
+            <textarea id="edit_obs" rows="2" placeholder="Outras..."></textarea>
+            <button class="btn-acao" onclick="gravar_leito()">💾 SALVAR DADOS</button>
         </div>
     </div>
 
     <div id="aba-bol" class="secao-aba"><h3>📢 Boletins</h3><div id="visor_bol"></div></div>
     <div id="aba-pen" class="secao-aba"><h3>📌 Pendências</h3><div id="visor_pen"></div></div>
-    <div id="aba-alt" class="secao-aba"><h3>🚪 Altas</h3><div id="visor_alt"></div></div>
-    <div id="aba-pas" class="secao-aba"><h3 style="text-align:center; border-bottom: 2px solid #000; padding-bottom: 10px;">DESCRIÇÃO DO PLANTÃO - <span id="txt_uti_print"></span></h3><div id="visor_pas"></div></div>
+    <div id="aba-pas" class="secao-aba">
+        <h3 style="text-align:center;">DESCRIÇÃO DO PLANTÃO - <span id="txt_uti_print"></span></h3>
+        <div id="visor_pas"></div>
+        <button class="btn-acao" onclick="window.print()">🖨️ IMPRIMIR TABELA</button>
+    </div>
 </div>
 
 <script>
-    const mapeamento = { "UCV 1": ["1","2","3","4","5","6","7"], "UCV 2": ["10","11","12","13","14","15","16","17","40","41"], "UCV 3": ["18","19","20","21","22","23","24","25","26","27","28","29","30","31","32"], "UCV 4
+    const mapeamento = { "UCV 1": ["1","2","3","4","5","6","7"], "UCV 2": ["10","11","12","13","14","15","16","17","40","41"], "UCV 3": ["18","19","20","21","22","23","24","25","26","27","28","29","30","31","32"], "UCV 4": ["33","34","35","36","37","38","39"] };
+    let banco_local = JSON.parse(localStorage.getItem('DB_PSI_V400_TABLE')) || {};
+    let leito_foco = null;
+
+    function liberar_acesso_total() {
+        if(document.getElementById('campo_senha_final').value === "psi123") {
+            document.getElementById('tela-entrada').style.display = 'none';
+            document.getElementById('sistema-completo').style.display = 'block';
+            const s = document.getElementById('filtro_uti'); s.innerHTML = '';
+            for(let u in mapeamento) s.innerHTML += `<option value="${u}">${u}</option>`;
+            atualizar_grade();
+        } else { alert("Senha Incorreta!"); }
+    }
+
+    function atualizar_grade() {
+        const u = document.getElementById('filtro_uti').value;
+        const g = document.getElementById('grade_leitos'); g.innerHTML = '';
+        mapeamento[u].forEach(l => {
+            const p = banco_local[l] || {n: ""};
+            g.innerHTML += `<div class="card-leito" onclick="carregar_leito('${l}')"><b>L${l}</b><br><small>${p.n || 'Vazio'}</small></div>`;
+        });
+    }
+
+    function ajustar_titulo() {
+        const n = document.getElementById('edit_nome').value;
+        document.getElementById('display-leito').innerText = n ? `LEITO ${leito_foco}: ${n.toUpperCase()}` : `LEITO ${leito_foco}`;
+    }
+
+    function carregar_leito(l) {
+        leito_foco = l;
+        const p = banco_local[l] || {n:"", prob:"", evo:"", psiq:"", cond:"", bol:"", obs:"", fech:"", vm:0, esp:0, del:0, iso:0, cp:0, alta:0, pf:0, pb:0, pc:0, pvi:0, pve:0};
+        document.getElementById('edit_nome').value = p.n;
+        document.getElementById('edit_prob').value = p.prob;
+        document.getElementById('edit_evo').value = p.evo;
+        document.getElementById('edit_psiq').value = p.psiq;
+        document.getElementById('edit_cond').value = p.cond;
+        document.getElementById('edit_bol').value = p.bol;
+        document.getElementById('edit_obs').value = p.obs;
+        document.getElementById('edit_fech').value = p.fech;
+        document.getElementById('c_vm').checked = p.vm;
+        document.getElementById('c_esp').checked = p.esp;
+        document.getElementById('c_del').checked = p.del;
+        document.getElementById('c_iso').checked = p.iso;
+        document.getElementById('c_cp').checked = p.cp;
+        document.getElementById('c_alta').checked = p.alta;
+        document.getElementById('p_fam').checked = p.pf;
+        document.getElementById('p_bol').checked = p.pb;
+        document.getElementById('p_cdi').checked = p.pc;
+        document.getElementById('p_vinf').checked = p.pvi;
+        document.getElementById('p_vest').checked = p.pve;
+        ajustar_titulo();
+        document.getElementById('painel-editor').style.display = 'block';
+        window.scrollTo(0, document.getElementById('painel-editor').offsetTop);
+    }
+
+    function gravar_leito() {
+        banco_local[leito_foco] = {
+            n: document.getElementById('edit_nome').value, prob: document.getElementById('edit_prob').value,
+            evo: document.getElementById('edit_evo').value, psiq: document.getElementById('edit_psiq').value,
+            cond: document.getElementById('edit_cond').value, bol: document.getElementById('edit_bol').value,
+            obs: document.getElementById('edit_obs').value, fech: document.getElementById('edit_fech').value,
+            vm: document.getElementById('c_vm').checked, esp: document.getElementById('c_esp').checked,
+            del: document.getElementById('c_del').checked, iso: document.getElementById('c_iso').checked,
+            cp: document.getElementById('c_cp').checked, alta: document.getElementById('c_alta').checked,
+            pf: document.getElementById('p_fam').checked, pb: document.getElementById('p_bol').checked,
+            pc: document.getElementById('p_cdi').checked, pvi: document.getElementById('p_vinf').checked, pve: document.getElementById('p_vest').checked
+        };
+        localStorage.setItem('DB_PSI_V400_TABLE', JSON.stringify(banco_local));
+        document.getElementById('painel-editor').style.display = 'none'; atualizar_grade();
+    }
+
+    function trocar_aba(t) {
+        document.querySelectorAll('.secao-aba').forEach(el => el.style.display = 'none');
+        document.getElementById('aba-' + t).style.display = 'block';
+        document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
+        if(t === 'pas') renderizar_passagem();
+        if(t === 'pen') renderizar_pendencias();
+        if(t === 'bol') renderizar_boletins();
+    }
+
+    function renderizar_passagem() {
+        const u = document.getElementById('filtro_uti').value;
+        document.getElementById('txt_uti_print').innerText = u;
+        let html = '<table class="tabela-multi"><tr><th>L</th><th>Paciente / Problemas</th><th>Clínica</th><th>Evolução</th><th>Exame Psíquico</th><th>Conduta / Alta</th></tr>';
+        for(let l in banco_local) if(banco_local[l].n) {
+            let p = banco_local[l]; let cl = []; 
+            if(p.vm) cl.push("VM"); if(p.esp) cl.push("ESP"); if(p.del) cl.push("DEL"); if(p.cp) cl.push("CP"); if(p.iso) cl.push("ISO");
+            html += `<tr><td><b>${l}</b></td><td><b>${p.n.toUpperCase()}</b><br><small>${p.prob}</small></td><td>${cl.join(', ')}</td><td>${p.evo}</td><td>${p.psiq}</td><td>${p.cond} ${p.fech ? '<br><b>ALTA:</b> '+p.fech : ''}</td></tr>`;
+        }
+        document.getElementById('visor_pas').innerHTML = html + '</table>';
+    }
+
+    function renderizar_boletins() {
+        let h = '';
+        for(let l in banco_local) if(banco_local[l].bol) h += `<div style="margin-bottom:10px"><b>L${l}:</b> ${banco_local[l].bol}</div>`;
+        document.getElementById('visor_bol').innerHTML = h || 'Vazio';
+    }
+
+    function renderizar_pendencias() {
+        let h = '';
+        for(let l in banco_local) {
+            let p = banco_local[l]; let pens = [];
+            if(p.pf) pens.push("Falar Família"); if(p.pb) pens.push("Boletim"); if(p.pc) pens.push("CDI/TRC");
+            if(p.pvi) pens.push("V. Infantil"); if(p.pve) pens.push("V. Estendida"); if(p.obs) pens.push(p.obs);
+            if(p.n && pens.length > 0) h += `<b>L${l} (${p.n}):</b><ul>` + pens.map(i => `<li>${i}</li>`).join('') + `</ul>`;
+        }
+        document.getElementById('visor_pen').innerHTML = h || 'Vazio';
+    }
+</script>
+</body>
+</html>
