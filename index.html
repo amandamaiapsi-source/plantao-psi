@@ -3,84 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestão PSI - Amanda Maia</title>
+    <title>SISTEMA PSI v2026</title>
     <style>
         :root { --cafe: #8D6E63; --cafe-esc: #4E342E; }
-        body { font-family: 'Segoe UI', sans-serif; background: #fff; color: #000; margin: 0; padding: 15px; }
-        .logo { color: var(--cafe-esc); font-size: 24px; font-weight: bold; text-align: center; margin-bottom: 20px; }
-        .login-box { max-width: 320px; margin: 100px auto; padding: 25px; border: 1px solid #ddd; border-radius: 12px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        input, textarea, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid var(--cafe); border-radius: 6px; box-sizing: border-box; font-size: 14px; }
-        label { font-weight: bold; color: var(--cafe-esc); display: block; margin-top: 10px; font-size: 14px; }
-        button { width: 100%; padding: 12px; background: var(--cafe); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; margin-top: 15px; }
-        .card { background: #Fdf5f2; border: 1px solid #ddd; border-top: 4px solid var(--cafe); padding: 12px; border-radius: 8px; text-align: center; cursor: pointer; min-height: 80px; }
-        .check-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 10px 0; }
-        .check-item { display: flex; align-items: center; gap: 8px; font-weight: normal; font-size: 12px; cursor: pointer; }
-        .tabs { display: flex; gap: 5px; margin-bottom: 15px; border-bottom: 2px solid #eee; overflow-x: auto; }
-        .tab { padding: 10px; cursor: pointer; font-weight: bold; color: var(--cafe); white-space: nowrap; }
-        .tab.active { border-bottom: 3px solid var(--cafe-esc); color: var(--cafe-esc); }
-        #app-content, #editor, .aba-view { display: none; }
-        .p-box { display: none; border: 1.5px solid #000; padding: 10px; margin-bottom: 15px; }
-        @media print {
-            @page { size: portrait; margin: 1cm; }
-            .tabs, #editor, select, .logo, button, label, .grid, .login-box { display: none !important; }
-            #app-content, #aba-pas, .p-box { display: block !important; }
-        }
+        body { font-family: sans-serif; background: #fff; padding: 20px; }
+        .login-box { max-width: 300px; margin: 50px auto; padding: 20px; border: 2px solid var(--cafe); border-radius: 10px; text-align: center; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; font-size: 16px; display: block; }
+        button { width: 100%; padding: 12px; background: var(--cafe); color: white; border: none; font-weight: bold; cursor: pointer; border-radius: 5px; }
+        #app-content, .aba, #editor { display: none; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; margin-top: 15px; }
+        .card { background: #fdf5f2; border: 1px solid #ddd; padding: 10px; text-align: center; cursor: pointer; border-radius: 5px; }
+        .tabs { display: flex; gap: 10px; border-bottom: 2px solid #eee; margin-bottom: 15px; }
+        .tab { padding: 10px; cursor: pointer; font-weight: bold; color: var(--cafe); }
+        label { font-weight: bold; display: block; margin-top: 10px; color: var(--cafe-esc); }
+        textarea { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid var(--cafe); border-radius: 5px; }
+        .checks { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; padding: 10px 0; font-size: 13px; }
+        .p-box { border: 1px solid #000; padding: 10px; margin-bottom: 10px; display: none; }
+        @media print { .tabs, #editor, .logo, button, label, .grid, .login-box, select { display: none !important; } #aba-pas, .p-box { display: block !important; } }
     </style>
 </head>
 <body>
 
-<div id="login-screen" class="login-box">
-    <div class="logo">PLANTÃO <span style="color:var(--cafe)">PSI</span></div>
-    <form onsubmit="event.preventDefault(); logar();">
-        <input type="password" id="pass" placeholder="Senha: psi123" required>
-        <button type="submit">ENTRAR</button>
-    </form>
+<div id="login-box" class="login-box">
+    <h2>ACESSO PSI</h2>
+    <input type="password" id="p" placeholder="SENHA" onkeypress="if(event.key==='Enter') entrar()">
+    <button onclick="entrar()">ENTRAR</button>
 </div>
 
 <div id="app-content">
-    <div class="logo">PLANTÃO <span style="color:var(--cafe)">PSI</span></div>
     <div class="tabs">
-        <div class="tab active" onclick="switchTab('mapa')">MAPA</div>
-        <div class="tab" onclick="switchTab('bol')">BOLETIM</div>
-        <div class="tab" onclick="switchTab('pen')">PENDÊNCIAS</div>
-        <div class="tab" onclick="switchTab('pas')">IMPRIMIR</div>
+        <div class="tab" onclick="tab('mapa')">MAPA</div>
+        <div class="tab" onclick="tab('pen')">PENDÊNCIAS</div>
+        <div class="tab" onclick="switchRel()">IMPRIMIR</div>
     </div>
 
-    <div id="aba-mapa" class="aba-view" style="display: block;">
-        <select id="sel-uti" onchange="renderMapa()"></select>
-        <div class="grid" id="mapa"></div>
-        <div id="editor" style="margin-top: 25px; border-top: 1px solid #eee; padding-top: 15px;">
-            <div id="nome-topo" style="background:var(--cafe-esc);color:white;padding:10px;border-radius:6px;font-weight:bold;">LEITO</div>
-            <label>Paciente:</label><input type="text" id="p-nome" oninput="atualizarNomeTopo()">
+    <div id="aba-mapa" class="aba" style="display:block">
+        <select id="uti" onchange="mapa()"></select>
+        <div id="grid" class="grid"></div>
+        
+        <div id="editor" style="margin-top:20px; border-top:2px solid #eee; padding-top:10px;">
+            <div id="topo" style="background:var(--cafe-esc); color:white; padding:10px; border-radius:5px; font-weight:bold;">LEITO</div>
+            <label>Paciente:</label><input type="text" id="n">
             <label>Marcadores:</label>
-            <div class="check-grid">
-                <label class="check-item"><input type="checkbox" id="p-vm"> VM</label>
-                <label class="check-item"><input type="checkbox" id="p-esp"> ESPONTÂNEA</label>
-                <label class="check-item"><input type="checkbox" id="p-del"> DELIRIUM</label>
-                <label class="check-item"><input type="checkbox" id="p-iso"> ISOLAMENTO</label>
-                <label class="check-item"><input type="checkbox" id="p-cp"> PALIATIVO</label>
-                <label class="check-item"><input type="checkbox" id="p-alta"> ALTA</label>
+            <div class="checks">
+                <label><input type="checkbox" id="vm"> VM</label>
+                <label><input type="checkbox" id="esp"> ESP</label>
+                <label><input type="checkbox" id="del"> DEL</label>
+                <label><input type="checkbox" id="cp"> CP</label>
+                <label><input type="checkbox" id="iso"> ISO</label>
+                <label><input type="checkbox" id="alt"> ALTA</label>
             </div>
-            <label>Problemas:</label><textarea id="p-prob" rows="2"></textarea>
-            <label>Evolução:</label><textarea id="p-hist" rows="4"></textarea>
-            <label>Exame Psíquico:</label><textarea id="p-psiq" rows="4"></textarea>
-            <label>Conduta:</label><textarea id="p-cond" rows="4"></textarea>
-            <label>Fechamento Alta:</label><textarea id="p-fech" rows="2"></textarea>
-            <label>Boletim:</label><textarea id="p-bol" rows="2"></textarea>
+            <label>Problemas:</label><textarea id="pr" rows="2"></textarea>
+            <label>Evolução:</label><textarea id="ev" rows="3"></textarea>
+            <label>Exame Psíquico:</label><textarea id="ex" rows="3"></textarea>
+            <label>Conduta:</label><textarea id="co" rows="3"></textarea>
+            <label>Boletim:</label><textarea id="bo" rows="2"></textarea>
             <label>Pendências:</label>
-            <div class="check-grid">
-                <label class="check-item"><input type="checkbox" id="pen-f"> Família</label>
-                <label class="check-item"><input type="checkbox" id="pen-b"> Boletim</label>
-                <label class="check-item"><input type="checkbox" id="pen-c"> CDI/TRC</label>
-                <label class="check-item"><input type="checkbox" id="pen-vi"> V. Infantil</label>
-                <label class="check-item"><input type="checkbox" id="pen-ve"> V. Estendida</label>
+            <div class="checks">
+                <label><input type="checkbox" id="pf"> Família</label>
+                <label><input type="checkbox" id="pb"> Boletim</label>
+                <label><input type="checkbox" id="pc"> CDI/TRC</label>
             </div>
-            <textarea id="p-obs" rows="2" placeholder="Outras..."></textarea>
             <button onclick="salvar()">💾 SALVAR NO LEITO</button>
         </div>
     </div>
 
-    <div id="aba-bol" class="aba-view"><h3>📢 Boletins</h3><div id="lista-bol"></div></div>
-    <div id="aba-pen" class="aba-view"><h3>📌 Pendências</h3><div id="lista-pen"></div></div>
-    <div id="aba
+    <div id="aba-pen" class="aba"><h3>Pendências</h3><div id="l-pen"></div></div>
+    <div id="aba-pas" class="aba"><h2 style="text-align:center">PLANTÃO PSI</h2><div id="corpo"></div></div>
+</div>
+
+<script>
+    const ucv = { "UCV 1": ["1","2","3","4","5","6","7"], "UCV 2": ["10","11","12","13","14","15","16","17","40","41"], "UCV 3": ["18","19","20","21","22","23","24","25","26","27","28","29","30","31","32"], "UCV 4": ["33","34","35","36","37","38","39"] };
+    // MUDANÇA DE NOME DO BANCO PARA FORÇAR RESET
+    let db = JSON.parse(localStorage.getItem('psi_v_2026_final_ok')) || {};
+    let f = null;
+
+    function entrar() {
+        if(document.getElementById('p').value === "psi123") {
+            document.getElementById('login-box').style.display='none';
