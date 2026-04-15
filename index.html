@@ -8,60 +8,113 @@
         :root { --cafe: #8D6E63; --cafe-esc: #4E342E; }
         body { font-family: 'Segoe UI', sans-serif; background: white; color: black; margin: 0; padding: 15px; }
         .logo { color: var(--cafe-esc); font-size: 24px; font-weight: bold; text-align: center; margin-bottom: 20px; }
-        .login-container { max-width: 300px; margin: 80px auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .login-container { max-width: 300px; margin: 80px auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px; text-align: center; }
         input, textarea, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid var(--cafe); border-radius: 6px; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; background: var(--cafe); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 8px; margin-top: 15px; }
-        .card { background: #Fdf5f2; border: 1px solid #ddd; border-top: 4px solid var(--cafe); padding: 10px; border-radius: 6px; text-align: center; font-size: 13px; }
+        button { width: 100%; padding: 12px; background: var(--cafe); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 5px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; margin-top: 15px; }
+        .card { background: #Fdf5f2; border: 1px solid #ddd; border-top: 4px solid var(--cafe); padding: 10px; border-radius: 6px; text-align: center; cursor: pointer; min-height: 85px; }
         .tag { font-size: 9px; padding: 2px 4px; border-radius: 3px; color: white; margin: 1px; display: inline-block; font-weight: bold; }
-        #app-content { display: none; }
-        .uti-header { background: var(--cafe-esc); color: white; padding: 8px; border-radius: 4px; margin-top: 15px; font-size: 14px; }
+        .t-vm { background-color: #e74c3c; } .t-esp { background-color: #1abc9c; } .t-del { background-color: #f39c12; }
+        .t-iso { background-color: #3498db; } .t-cp { background-color: #9b59b6; } .t-cf { background-color: #2ecc71; } .t-poi { background-color: #7f8c8d; }
+        #app-content, #editor, .aba-view { display: none; }
+        .tabs { display: flex; gap: 5px; margin-bottom: 15px; border-bottom: 2px solid #eee; overflow-x: auto; white-space: nowrap; }
+        .tab { padding: 10px; cursor: pointer; font-weight: bold; color: var(--cafe); font-size: 13px; }
+        .tab.active { border-bottom: 3px solid var(--cafe-esc); color: var(--cafe-esc); }
+        .check-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; font-size: 11px; padding: 10px 0; }
+        table { width:100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #Fdf5f2; }
+        @media print { .tabs, #editor, select, .logo, button, #edit-titulo { display: none !important; } #tab-passagem, .aba-view { display: block !important; } }
     </style>
 </head>
 <body>
 
 <div id="login-screen" class="login-container">
     <div class="logo">PLANTÃO <span style="color:var(--cafe)">PSI</span></div>
-    <input type="password" id="pass" placeholder="Sua Senha">
+    <input type="password" id="pass" placeholder="Senha: psi123">
     <button onclick="logar()">ENTRAR</button>
 </div>
 
 <div id="app-content">
     <div class="logo">PLANTÃO <span style="color:var(--cafe)">PSI</span></div>
-    <div class="uti-header">Selecione a Unidade</div>
-    <select id="sel-uti" onchange="render()">
-        <option value="U1">UCV 1 (Leitos 1-7)</option>
-        <option value="U2">UCV 2 (10-17, 40, 41)</option>
-        <option value="U3">UCV 3 (Leitos 18-32)</option>
-        <option value="U4">UCV 4 (Leitos 33-39)</option>
-    </select>
-    <div class="grid" id="mapa"></div>
+    
+    <div class="tabs">
+        <div class="tab active" id="t-mapa" onclick="switchTab('mapa')">🗺️ MAPA</div>
+        <div class="tab" id="t-pen" onclick="switchTab('pen')">📌 PENDÊNCIAS</div>
+        <div class="tab" id="t-alt" onclick="switchTab('alt')">🚪 ALTAS</div>
+        <div class="tab" id="t-pas" onclick="switchTab('pas')">🖨️ PASSAGEM</div>
+    </div>
+
+    <div id="aba-mapa" class="aba-view" style="display: block;">
+        <select id="sel-uti" onchange="renderMapa()"></select>
+        <div class="grid" id="mapa"></div>
+        <div id="editor" style="margin-top: 20px; border-top: 2px solid #eee; padding-top: 20px;">
+            <h3 id="edit-titulo">Editando</h3>
+            <input type="text" id="p-nome" placeholder="Nome do Paciente">
+            <div class="check-grid">
+                <label><input type="checkbox" id="p-vm"> VM</label>
+                <label><input type="checkbox" id="p-esp"> ESP</label>
+                <label><input type="checkbox" id="p-del"> DEL</label>
+                <label><input type="checkbox" id="p-iso"> ISO</label>
+                <label><input type="checkbox" id="p-cp"> CP</label>
+                <label><input type="checkbox" id="p-cf"> CONF</label>
+                <label><input type="checkbox" id="p-poi"> POI</label>
+                <label><input type="checkbox" id="p-alta"> ALTA</label>
+            </div>
+            <textarea id="p-hist" rows="4" placeholder="História Médica / Problemas"></textarea>
+            <textarea id="p-pend" rows="2" placeholder="Pendências para o próximo plantão"></textarea>
+            <textarea id="p-cond" rows="4" placeholder="Conduta Psicológica"></textarea>
+            <button onclick="salvar()">💾 SALVAR DADOS</button>
+        </div>
+    </div>
+
+    <div id="aba-pen" class="aba-view"><h3>Pendências do Setor</h3><div id="lista-pendencias"></div></div>
+    <div id="aba-alt" class="aba-view"><h3>Pacientes com Previsão de Alta</h3><div id="lista-altas"></div></div>
+    <div id="aba-pas" class="aba-view"><h3>Relatório Geral de Passagem</h3><div id="tabela-passagem"></div></div>
 </div>
 
 <script>
     const unds = {
-        "U1": ["1","2","3","4","5","6","7"],
-        "U2": ["10","11","12","13","14","15","16","17","40","41"],
-        "U3": ["18","19","20","21","22","23","24","25","26","27","28","29","30","31","32"],
-        "U4": ["33","34","35","36","37","38","39"]
+        "UCV 1": ["1","2","3","4","5","6","7"],
+        "UCV 2": ["10","11","12","13","14","15","16","17","40","41"],
+        "UCV 3": ["18","19","20","21","22","23","24","25","26","27","28","29","30","31","32"],
+        "UCV 4": ["33","34","35","36","37","38","39"]
     };
+
+    let db = JSON.parse(localStorage.getItem('plantao_psi_db')) || {};
+    let foco = null;
 
     function logar() {
         if(document.getElementById('pass').value === "psi123") {
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('app-content').style.display = 'block';
-            render();
+            const sel = document.getElementById('sel-uti');
+            for(let u in unds) sel.innerHTML += `<option value="${u}">${u}</option>`;
+            renderMapa();
         } else { alert("Senha incorreta!"); }
     }
 
-    function render() {
+    function renderMapa() {
         const u = document.getElementById('sel-uti').value;
         const m = document.getElementById('mapa');
         m.innerHTML = '';
         unds[u].forEach(l => {
-            m.innerHTML += `<div class="card"><b>L${l}</b><br><small>Vazio</small></div>`;
+            const p = db[l] || {n: ""};
+            let tags = p.alta ? '<span class="tag t-cf">ALTA</span>' : '';
+            m.innerHTML += `<div class="card" onclick="abrir('${l}')"><b>L${l}</b><br><small>${p.n || 'Vazio'}</small><br>${tags}</div>`;
         });
     }
-</script>
-</body>
-</html>
+
+    function abrir(l) {
+        foco = l;
+        const p = db[l] || {n:"", h:"", c:"", pend:"", vm:false, esp:false, del:false, iso:false, cp:false, cf:false, poi:false, alta:false};
+        document.getElementById('edit-titulo').innerText = "Editando Leito " + l;
+        document.getElementById('p-nome').value = p.n;
+        document.getElementById('p-hist').value = p.h;
+        document.getElementById('p-cond').value = p.c;
+        document.getElementById('p-pend').value = p.pend || "";
+        document.getElementById('p-vm').checked = p.vm;
+        document.getElementById('p-esp').checked = p.esp;
+        document.getElementById('p-del').checked = p.del;
+        document.getElementById('p-iso').checked = p.iso;
+        document
