@@ -15,10 +15,10 @@
         .grid-leitos { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; margin-top: 15px; }
         .card-leito { background: #Fdf5f2; border: 1px solid #ddd; border-top: 4px solid var(--cafe); padding: 12px; border-radius: 8px; text-align: center; cursor: pointer; }
         
-        /* AJUSTE DOS BOTÕES TRONCHOS */
-        .check-container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 10px 0; }
-        .check-box { display: flex; align-items: center; gap: 8px; font-weight: normal; font-size: 13px; cursor: pointer; margin: 0; }
-        .check-box input { width: auto; margin: 0; display: inline-block; }
+        /* AJUSTE DOS QUADRADINHOS PARA NÃO FICAR TRONCHO */
+        .check-container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; padding: 10px 0; }
+        .check-box { display: flex; align-items: center; gap: 8px; font-weight: normal; font-size: 12px; cursor: pointer; margin-bottom: 5px; }
+        .check-box input { width: 16px; height: 16px; margin: 0; cursor: pointer; }
 
         .nav-tabs { display: flex; gap: 5px; margin-bottom: 15px; border-bottom: 2px solid #eee; overflow-x: auto; }
         .nav-tab { padding: 10px; cursor: pointer; font-weight: bold; color: var(--cafe); white-space: nowrap; }
@@ -26,7 +26,6 @@
         #sistema-completo, #painel-editor, .secao-aba { display: none; }
         .header-leito { background: var(--cafe-esc); color: white; padding: 10px; border-radius: 6px; margin-bottom: 15px; font-size: 18px; font-weight: bold; }
         
-        /* TABELA PARA VISITA MULTI */
         .tabela-multi { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 10px; }
         .tabela-multi th, .tabela-multi td { border: 1px solid #333; padding: 8px; text-align: left; vertical-align: top; }
         .tabela-multi th { background-color: #Fdf5f2; color: var(--cafe-esc); }
@@ -35,7 +34,6 @@
             @page { size: landscape; margin: 1cm; }
             .nav-tabs, #painel-editor, select, .logo-hosp, .btn-acao, label, .grid-leitos, .login-card { display: none !important; }
             #sistema-completo, #aba-pas { display: block !important; }
-            .tabela-multi { font-size: 10px; }
             body { padding: 0; }
         }
     </style>
@@ -53,8 +51,8 @@
     <div class="nav-tabs">
         <div class="nav-tab active" onclick="trocar_aba('mapa')">🗺️ MAPA</div>
         <div class="nav-tab" onclick="trocar_aba('bol')">📢 BOLETIM</div>
-        <div class="nav-tab" onclick="trocar_aba('pen')">📌 PENDÊNCIAS</div>
-        <div class="nav-tab" onclick="trocar_aba('pas')">📋 VISITA MULTI (TABELA)</div>
+        <div class="tab" onclick="trocar_aba('pen')" style="padding:10px; cursor:pointer; font-weight:bold; color:var(--cafe);">📌 PENDÊNCIAS</div>
+        <div class="nav-tab" onclick="trocar_aba('pas')">📋 VISITA MULTI</div>
     </div>
 
     <div id="aba-mapa" class="secao-aba" style="display: block;">
@@ -72,7 +70,9 @@
                 <label class="check-box"><input type="checkbox" id="c_del"> DELIRIUM</label>
                 <label class="check-box"><input type="checkbox" id="c_iso"> ISOLAMENTO</label>
                 <label class="check-box"><input type="checkbox" id="c_cp"> PALIATIVO</label>
-                <label class="check-item"><input type="checkbox" id="c_alta"> ALTA</label>
+                <label class="check-box"><input type="checkbox" id="c_cf"> CONFERÊNCIA</label>
+                <label class="check-box"><input type="checkbox" id="c_alta"> ALTA</label>
+                <label class="check-box"><input type="checkbox" id="c_poi"> POI</label>
             </div>
 
             <label>Lista de Problemas:</label><textarea id="edit_prob" rows="2"></textarea>
@@ -106,7 +106,7 @@
 
 <script>
     const mapeamento = { "UCV 1": ["1","2","3","4","5","6","7"], "UCV 2": ["10","11","12","13","14","15","16","17","40","41"], "UCV 3": ["18","19","20","21","22","23","24","25","26","27","28","29","30","31","32"], "UCV 4": ["33","34","35","36","37","38","39"] };
-    let banco_local = JSON.parse(localStorage.getItem('DB_PSI_V400_TABLE')) || {};
+    let banco_local = JSON.parse(localStorage.getItem('DB_PSI_VERCEL_FIX')) || {};
     let leito_foco = null;
 
     function liberar_acesso_total() {
@@ -124,95 +124,4 @@
         const g = document.getElementById('grade_leitos'); g.innerHTML = '';
         mapeamento[u].forEach(l => {
             const p = banco_local[l] || {n: ""};
-            g.innerHTML += `<div class="card-leito" onclick="carregar_leito('${l}')"><b>L${l}</b><br><small>${p.n || 'Vazio'}</small></div>`;
-        });
-    }
-
-    function ajustar_titulo() {
-        const n = document.getElementById('edit_nome').value;
-        document.getElementById('display-leito').innerText = n ? `LEITO ${leito_foco}: ${n.toUpperCase()}` : `LEITO ${leito_foco}`;
-    }
-
-    function carregar_leito(l) {
-        leito_foco = l;
-        const p = banco_local[l] || {n:"", prob:"", evo:"", psiq:"", cond:"", bol:"", obs:"", fech:"", vm:0, esp:0, del:0, iso:0, cp:0, alta:0, pf:0, pb:0, pc:0, pvi:0, pve:0};
-        document.getElementById('edit_nome').value = p.n;
-        document.getElementById('edit_prob').value = p.prob;
-        document.getElementById('edit_evo').value = p.evo;
-        document.getElementById('edit_psiq').value = p.psiq;
-        document.getElementById('edit_cond').value = p.cond;
-        document.getElementById('edit_bol').value = p.bol;
-        document.getElementById('edit_obs').value = p.obs;
-        document.getElementById('edit_fech').value = p.fech;
-        document.getElementById('c_vm').checked = p.vm;
-        document.getElementById('c_esp').checked = p.esp;
-        document.getElementById('c_del').checked = p.del;
-        document.getElementById('c_iso').checked = p.iso;
-        document.getElementById('c_cp').checked = p.cp;
-        document.getElementById('c_alta').checked = p.alta;
-        document.getElementById('p_fam').checked = p.pf;
-        document.getElementById('p_bol').checked = p.pb;
-        document.getElementById('p_cdi').checked = p.pc;
-        document.getElementById('p_vinf').checked = p.pvi;
-        document.getElementById('p_vest').checked = p.pve;
-        ajustar_titulo();
-        document.getElementById('painel-editor').style.display = 'block';
-        window.scrollTo(0, document.getElementById('painel-editor').offsetTop);
-    }
-
-    function gravar_leito() {
-        banco_local[leito_foco] = {
-            n: document.getElementById('edit_nome').value, prob: document.getElementById('edit_prob').value,
-            evo: document.getElementById('edit_evo').value, psiq: document.getElementById('edit_psiq').value,
-            cond: document.getElementById('edit_cond').value, bol: document.getElementById('edit_bol').value,
-            obs: document.getElementById('edit_obs').value, fech: document.getElementById('edit_fech').value,
-            vm: document.getElementById('c_vm').checked, esp: document.getElementById('c_esp').checked,
-            del: document.getElementById('c_del').checked, iso: document.getElementById('c_iso').checked,
-            cp: document.getElementById('c_cp').checked, alta: document.getElementById('c_alta').checked,
-            pf: document.getElementById('p_fam').checked, pb: document.getElementById('p_bol').checked,
-            pc: document.getElementById('p_cdi').checked, pvi: document.getElementById('p_vinf').checked, pve: document.getElementById('p_vest').checked
-        };
-        localStorage.setItem('DB_PSI_V400_TABLE', JSON.stringify(banco_local));
-        document.getElementById('painel-editor').style.display = 'none'; atualizar_grade();
-    }
-
-    function trocar_aba(t) {
-        document.querySelectorAll('.secao-aba').forEach(el => el.style.display = 'none');
-        document.getElementById('aba-' + t).style.display = 'block';
-        document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
-        if(t === 'pas') renderizar_passagem();
-        if(t === 'pen') renderizar_pendencias();
-        if(t === 'bol') renderizar_boletins();
-    }
-
-    function renderizar_passagem() {
-        const u = document.getElementById('filtro_uti').value;
-        document.getElementById('txt_uti_print').innerText = u;
-        let html = '<table class="tabela-multi"><tr><th>L</th><th>Paciente / Problemas</th><th>Clínica</th><th>Evolução</th><th>Exame Psíquico</th><th>Conduta / Alta</th></tr>';
-        for(let l in banco_local) if(banco_local[l].n) {
-            let p = banco_local[l]; let cl = []; 
-            if(p.vm) cl.push("VM"); if(p.esp) cl.push("ESP"); if(p.del) cl.push("DEL"); if(p.cp) cl.push("CP"); if(p.iso) cl.push("ISO");
-            html += `<tr><td><b>${l}</b></td><td><b>${p.n.toUpperCase()}</b><br><small>${p.prob}</small></td><td>${cl.join(', ')}</td><td>${p.evo}</td><td>${p.psiq}</td><td>${p.cond} ${p.fech ? '<br><b>ALTA:</b> '+p.fech : ''}</td></tr>`;
-        }
-        document.getElementById('visor_pas').innerHTML = html + '</table>';
-    }
-
-    function renderizar_boletins() {
-        let h = '';
-        for(let l in banco_local) if(banco_local[l].bol) h += `<div style="margin-bottom:10px"><b>L${l}:</b> ${banco_local[l].bol}</div>`;
-        document.getElementById('visor_bol').innerHTML = h || 'Vazio';
-    }
-
-    function renderizar_pendencias() {
-        let h = '';
-        for(let l in banco_local) {
-            let p = banco_local[l]; let pens = [];
-            if(p.pf) pens.push("Falar Família"); if(p.pb) pens.push("Boletim"); if(p.pc) pens.push("CDI/TRC");
-            if(p.pvi) pens.push("V. Infantil"); if(p.pve) pens.push("V. Estendida"); if(p.obs) pens.push(p.obs);
-            if(p.n && pens.length > 0) h += `<b>L${l} (${p.n}):</b><ul>` + pens.map(i => `<li>${i}</li>`).join('') + `</ul>`;
-        }
-        document.getElementById('visor_pen').innerHTML = h || 'Vazio';
-    }
-</script>
-</body>
-</html>
+            g.innerHTML += `<div class="card
