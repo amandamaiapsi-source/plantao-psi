@@ -61,4 +61,144 @@
                 <label class="check-item"><input type="checkbox" id="p-poi"> POI</label>
                 <label class="check-item"><input type="checkbox" id="p-alta"> ALTA</label>
             </div>
-            <label>Lista de Problemas
+            <label>Lista de Problemas / Diagnósticos:</label>
+            <textarea id="p-prob" rows="2"></textarea>
+            <label>História Médica / Evolução Clínica:</label>
+            <textarea id="p-hist" rows="4"></textarea>
+            <label>Exame das Funções Psíquicas:</label>
+            <textarea id="p-psiq" rows="4"></textarea>
+            <label>Manejo e Conduta Psicológica:</label>
+            <textarea id="p-cond" rows="4"></textarea>
+            <label>📌 Pendências para o Plantão:</label>
+            <div class="check-grid">
+                <label class="check-item"><input type="checkbox" id="pen-f"> Falar com Família</label>
+                <label class="check-item"><input type="checkbox" id="pen-e"> Discutir Equipe</label>
+                <label class="check-item"><input type="checkbox" id="pen-a"> Nova Avaliação</label>
+                <label class="check-item"><input type="checkbox" id="pen-l"> Suporte Luto</label>
+                <label class="check-item"><input type="checkbox" id="pen-t"> Aplicar Testes</label>
+                <label class="check-item"><input type="checkbox" id="pen-h"> Fechamento Alta</label>
+            </div>
+            <textarea id="p-obs" rows="2" placeholder="Outras pendências..."></textarea>
+            <button onclick="salvar()">💾 SALVAR DADOS</button>
+        </div>
+    </div>
+
+    <div id="aba-pen" class="aba-view"><h3>📌 Pendências</h3><div id="lista-pen"></div></div>
+    <div id="aba-alt" class="aba-view"><h3>🚪 Altas</h3><div id="lista-alt"></div></div>
+    <div id="aba-pas" class="aba-view"><h3>📋 Relatório</h3><div id="tab-pas"></div></div>
+</div>
+
+<script>
+    const unds = { "UCV 1": ["1","2","3","4","5","6","7"], "UCV 2": ["10","11","12","13","14","15","16","17","40","41"], "UCV 3": ["18","19","20","21","22","23","24","25","26","27","28","29","30","31","32"], "UCV 4": ["33","34","35","36","37","38","39"] };
+    let db = JSON.parse(localStorage.getItem('psi_final_v5')) || {};
+    let foco = null;
+
+    function logar() {
+        if(document.getElementById('pass').value === "psi123") {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('app-content').style.display = 'block';
+            const sel = document.getElementById('sel-uti');
+            sel.innerHTML = '';
+            for(let u in unds) sel.innerHTML += `<option value="${u}">${u}</option>`;
+            renderMapa();
+        } else { alert("Senha incorreta!"); }
+    }
+
+    function renderMapa() {
+        const u = document.getElementById('sel-uti').value;
+        const m = document.getElementById('mapa');
+        m.innerHTML = '';
+        unds[u].forEach(l => {
+            const p = db[l] || {n: ""};
+            m.innerHTML += `<div class="card" onclick="abrir('${l}')"><b>L${l}</b><br><small>${p.n || 'Vazio'}</small></div>`;
+        });
+    }
+
+    function atualizarNomeTopo() {
+        const n = document.getElementById('p-nome').value;
+        document.getElementById('nome-topo').innerText = n ? `LEITO ${foco}: ${n.toUpperCase()}` : `LEITO ${foco}`;
+    }
+
+    function abrir(l) {
+        foco = l;
+        const p = db[l] || {n:"", prob:"", h:"", psiq:"", c:"", obs:"", vm:0, esp:0, del:0, iso:0, cp:0, cf:0, poi:0, alta:0, pf:0, pe:0, pa:0, pl:0, pt:0, ph:0};
+        document.getElementById('p-nome').value = p.n;
+        document.getElementById('p-prob').value = p.prob;
+        document.getElementById('p-hist').value = p.h;
+        document.getElementById('p-psiq').value = p.psiq;
+        document.getElementById('p-cond').value = p.c;
+        document.getElementById('p-obs').value = p.obs;
+        document.getElementById('p-vm').checked = p.vm;
+        document.getElementById('p-esp').checked = p.esp;
+        document.getElementById('p-del').checked = p.del;
+        document.getElementById('p-iso').checked = p.iso;
+        document.getElementById('p-cp').checked = p.cp;
+        document.getElementById('p-cf').checked = p.cf;
+        document.getElementById('p-poi').checked = p.poi;
+        document.getElementById('p-alta').checked = p.alta;
+        document.getElementById('pen-f').checked = p.pf;
+        document.getElementById('pen-e').checked = p.pe;
+        document.getElementById('pen-a').checked = p.pa;
+        document.getElementById('pen-l').checked = p.pl;
+        document.getElementById('pen-t').checked = p.pt;
+        document.getElementById('pen-h').checked = p.ph;
+        atualizarNomeTopo();
+        document.getElementById('editor').style.display = 'block';
+        window.scrollTo(0, document.getElementById('editor').offsetTop);
+    }
+
+    function salvar() {
+        db[foco] = {
+            n: document.getElementById('p-nome').value, prob: document.getElementById('p-prob').value,
+            h: document.getElementById('p-hist').value, psiq: document.getElementById('p-psiq').value,
+            c: document.getElementById('p-cond').value, obs: document.getElementById('p-obs').value,
+            vm: document.getElementById('p-vm').checked, esp: document.getElementById('p-esp').checked,
+            del: document.getElementById('p-del').checked, iso: document.getElementById('p-iso').checked,
+            cp: document.getElementById('p-cp').checked, cf: document.getElementById('p-cf').checked,
+            poi: document.getElementById('p-poi').checked, alta: document.getElementById('p-alta').checked,
+            pf: document.getElementById('pen-f').checked, pe: document.getElementById('pen-e').checked,
+            pa: document.getElementById('pen-a').checked, pl: document.getElementById('pen-l').checked,
+            pt: document.getElementById('pen-t').checked, ph: document.getElementById('pen-h').checked
+        };
+        localStorage.setItem('psi_final_v5', JSON.stringify(db));
+        document.getElementById('editor').style.display = 'none';
+        renderMapa();
+        alert("Salvo!");
+    }
+
+    function switchTab(t) {
+        document.querySelectorAll('.aba-view').forEach(el => el.style.display = 'none');
+        document.getElementById('aba-' + t).style.display = 'block';
+        document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+        if(t === 'pas') renderPassagem();
+        if(t === 'alt') renderAltas();
+        if(t === 'pen') renderPendencias();
+    }
+
+    function renderPassagem() {
+        let h = '<table><tr><th>L</th><th>Paciente / Problemas</th><th>Clínica</th><th>Evolução / Exame</th><th>Conduta</th></tr>';
+        for(let l in db) if(db[l].n) {
+            let cl = []; if(db[l].vm) cl.push("VM"); if(db[l].esp) cl.push("ESP"); if(db[l].del) cl.push("DEL"); if(db[l].cp) cl.push("CP");
+            h += `<tr><td><b>${l}</b></td><td><b>${db[l].n}</b><br><small>${db[l].prob}</small></td><td>${cl.join(', ')}</td><td>${db[l].h}<br>---<br><b>EXAME:</b> ${db[l].psiq}</td><td>${db[l].c}</td></tr>`;
+        }
+        document.getElementById('tab-pas').innerHTML = h + '</table>';
+    }
+
+    function renderAltas() {
+        let h = '<ul>';
+        for(let l in db) if(db[l].alta) h += `<li>Leito ${l}: ${db[l].n}</li>`;
+        document.getElementById('lista-alt').innerHTML = h + '</ul>';
+    }
+
+    function renderPendencias() {
+        let h = '';
+        for(let l in db) {
+            let p = db[l]; let pens = [];
+            if(p.pf) pens.push("Falar Família"); if(p.pe) pens.push("Equipe"); if(p.pa) pens.push("Avaliação"); if(p.pl) pens.push("Luto"); if(p.pt) pens.push("Testes"); if(p.ph) pens.push("Alta"); if(p.obs) pens.push(p.obs);
+            if(p.n && pens.length > 0) h += `<b>L${l} (${p.n}):</b> <ul>` + pens.map(i => `<li>${i}</li>`).join('') + `</ul>`;
+        }
+        document.getElementById('lista-pen').innerHTML = h || 'Vazio';
+    }
+</script>
+</body>
+</html>
