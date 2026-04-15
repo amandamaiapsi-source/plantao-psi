@@ -50,9 +50,9 @@
 
 <div id="login" class="login-box">
     <h2 style="color:var(--cafe-esc)">GESTÃO PSI</h2>
-    <form onsubmit="event.preventDefault(); logar_sistema_v4();">
-        <input type="password" id="pass_v4" placeholder="Senha: psi123" required autocomplete="current-password">
-        <button type="submit" class="btn">ENTRAR</button>
+    <form onsubmit="event.preventDefault(); dispararAcessoTotal();">
+        <input type="password" id="sk_key_2026" placeholder="Senha de Acesso" required autocomplete="new-password">
+        <button type="submit" class="btn">ENTRAR NO SISTEMA</button>
     </form>
 </div>
 
@@ -91,7 +91,7 @@
             <label>Manejo e Conduta:</label><textarea id="co" rows="3"></textarea>
             <label>Boletim:</label><textarea id="bo" rows="2"></textarea>
             
-            <label>📌 Pendências (O que precisa ser feito):</label>
+            <label>📌 Pendências:</label>
             <div class="check-grid">
                 <label class="check-item"><input type="checkbox" id="p_f"> Falar Família</label>
                 <label class="check-item"><input type="checkbox" id="p_conf"> Conferência Familiar</label>
@@ -107,21 +107,17 @@
 
     <div id="aba-bol" class="aba"><h3 class="tit-aba">📢 Boletins</h3><div id="v_bol"></div></div>
     <div id="aba-pen" class="aba"><h3 class="tit-aba">📌 Pendências</h3><div id="v_pen"></div></div>
-    
-    <div id="aba-multi" class="aba">
-        <h2 style="text-align:center" id="titulo_multi">VISITA MULTI</h2>
-        <div id="v_multi"></div>
-        <button class="btn" onclick="window.print()" style="margin-top:20px">🖨️ IMPRIMIR TABELA</button>
-    </div>
+    <div id="aba-multi" class="aba"><h2 style="text-align:center" id="titulo_multi">VISITA MULTI</h2><div id="v_multi"></div></div>
 </div>
 
 <script>
     const ucvs = { "UCV 1": ["1","2","3","4","5","6","7"], "UCV 2": ["10","11","12","13","14","15","16","17","40","41"], "UCV 3": ["18","19","20","21","22","23","24","25","26","27","28","29","30","31","32"], "UCV 4": ["33","34","35","36","37","38","39"] };
-    let db = JSON.parse(localStorage.getItem('DB_PSI_V4_ULTRA')) || {};
+    // DATABASE NOVO PARA FORÇAR LIMPEZA
+    let db = JSON.parse(localStorage.getItem('DB_PSI_V2026_FINAL')) || {};
     let fl = null;
 
-    function logar_sistema_v4() {
-        if(document.getElementById('pass_v4').value === "psi123") {
+    function dispararAcessoTotal() {
+        if(document.getElementById('sk_key_2026').value === "psi123") {
             document.getElementById('login').style.display = 'none';
             document.getElementById('app').style.display = 'block';
             const s = document.getElementById('uti'); s.innerHTML = '';
@@ -157,4 +153,66 @@
         document.getElementById('m_pal').checked = p.pal||0; document.getElementById('m_iso').checked = p.iso||0;
         document.getElementById('m_alta').checked = p.alta||0;
         document.getElementById('p_f').checked = p.pf||0; document.getElementById('p_conf').checked = p.pconf||0;
-        document.getElementById('p_v_inf').checked = p.pvinf||0; document.getElementById('
+        document.getElementById('p_v_inf').checked = p.pvinf||0; document.getElementById('p_v_est').checked = p.pvest||0;
+        document.getElementById('p_b').checked = p.pb||0; document.getElementById('p_c').checked = p.pc||0;
+        document.getElementById('editor').style.display = 'block';
+        window.scrollTo(0, document.getElementById('editor').offsetTop);
+    }
+
+    function salvar() {
+        db[fl] = {
+            n: document.getElementById('n').value, id: document.getElementById('id').value,
+            sm: document.getElementById('sm').value, pr: document.getElementById('pr').value,
+            ev: document.getElementById('ev').value, ps: document.getElementById('ps').value,
+            co: document.getElementById('co').value, bo: document.getElementById('bo').value,
+            ob: document.getElementById('ob').value, vm: document.getElementById('m_vm').checked,
+            del: document.getElementById('m_del').checked, pal: document.getElementById('m_pal').checked,
+            iso: document.getElementById('m_iso').checked, alta: document.getElementById('m_alta').checked,
+            pf: document.getElementById('p_f').checked, pconf: document.getElementById('p_conf').checked,
+            pvinf: document.getElementById('p_v_inf').checked, pvest: document.getElementById('p_v_est').checked,
+            pb: document.getElementById('p_b').checked, pc: document.getElementById('p_c').checked
+        };
+        localStorage.setItem('DB_PSI_V2026_FINAL', JSON.stringify(db));
+        document.getElementById('editor').style.display = 'none'; mapa();
+    }
+
+    function ver(t) {
+        document.querySelectorAll('.aba').forEach(a => a.style.display = 'none');
+        document.getElementById('aba-' + t).style.display = 'block';
+        document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+        if(t === 'multi') renderMulti();
+        if(t === 'pen') renderPen();
+        if(t === 'bol') renderBol();
+    }
+
+    function renderMulti() {
+        const uti = document.getElementById('uti').value;
+        document.getElementById('titulo_multi').innerText = "VISITA MULTI - " + uti;
+        let h = '<table class="tabela-multi"><thead><tr><th>L</th><th>Paciente (Idade)</th><th>Smart</th><th>Clínica</th><th>Problemas</th><th>Evolução/História</th><th>Funções Psíquicas</th><th>Conduta</th></tr></thead><tbody>';
+        for(let l in db) if(db[l].n) {
+            let p = db[l]; let cl = []; if(p.vm) cl.push("VM"); if(p.del) cl.push("DEL"); if(p.pal) cl.push("PAL"); if(p.iso) cl.push("ISO");
+            h += `<tr><td>${l}</td><td>${p.n} (${p.id})</td><td>${p.sm}</td><td>${cl.join(', ')}</td><td>${p.pr}</td><td>${p.ev}</td><td>${p.ps}</td><td>${p.co}</td></tr>`;
+        }
+        document.getElementById('v_multi').innerHTML = h + '</tbody></table><button class="btn" onclick="window.print()" style="margin-top:20px">🖨️ IMPRIMIR TABELA</button>';
+    }
+
+    function renderPen() {
+        let h = '';
+        for(let l in db) {
+            let p = db[l]; let pens = [];
+            if(p.pf) pens.push("Falar Família"); if(p.pconf) pens.push("Conferência Familiar");
+            if(p.pvinf) pens.push("Av. Visita Infantil"); if(p.pvest) pens.push("Visita Estendida");
+            if(p.pb) pens.push("Boletim"); if(p.pc) pens.push("CDI/TRC");
+            if(p.n && (pens.length || p.ob)) h += `<b>L${l} (${p.n}):</b> ${pens.join(', ')} ${p.ob ? '- '+p.ob : ''}<br><hr>`;
+        }
+        document.getElementById('v_pen').innerHTML = h || 'Vazio';
+    }
+
+    function renderBol() {
+        let h = '';
+        for(let l in db) if(db[l].bo) h += `<b>L${l}:</b> ${db[l].bo}<br><hr>`;
+        document.getElementById('v_bol').innerHTML = h || 'Vazio';
+    }
+</script>
+</body>
+</html>
