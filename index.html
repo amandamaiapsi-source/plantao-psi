@@ -22,20 +22,20 @@
         .tab.active { border-bottom: 3px solid var(--cafe-esc); color: var(--cafe-esc); }
         #app-content, #editor, .aba-view { display: none; }
         
-        /* AJUSTE DA TABELA */
+        /* TABELA DE IMPRESSÃO */
         table { width:100%; border-collapse: collapse; font-size: 10px; margin-top: 10px; table-layout: fixed; }
-        th, td { border: 1px solid #333; padding: 6px; text-align: left; vertical-align: top; word-wrap: break-word; }
-        th { background-color: #f2f2f2; }
+        th, td { border: 1px solid #000; padding: 6px; text-align: left; vertical-align: top; word-wrap: break-word; }
+        th { background-color: #eee !important; color: black; }
         .titulo-leito { background: var(--cafe-esc); color: white; padding: 10px; border-radius: 6px; margin-bottom: 15px; font-size: 18px; font-weight: bold; }
 
-        /* REGRA DE OURO PARA IMPRESSÃO: SÓ A TABELA */
         @media print { 
             @page { size: landscape; margin: 1cm; }
             .tabs, #editor, select, .logo, button, label, h3, .grid, .login-container { display: none !important; } 
             .aba-view { display: none !important; }
             #aba-pas, #aba-pas * { display: block !important; }
             #tab-pas table { display: table !important; width: 100% !important; }
-            body { padding: 0; }
+            body { padding: 0; background: white; }
+            th { -webkit-print-color-adjust: exact; background-color: #eee !important; }
         }
     </style>
 </head>
@@ -54,7 +54,7 @@
         <div class="tab" onclick="switchTab('bol')">📢 BOLETIM</div>
         <div class="tab" onclick="switchTab('pen')">📌 PENDÊNCIAS</div>
         <div class="tab" onclick="switchTab('alt')">🚪 ALTAS</div>
-        <div class="tab" onclick="switchTab('pas')">🖨️ PASSAGEM</div>
+        <div class="tab" onclick="switchTab('pas')">🖨️ IMPRIMIR</div>
     </div>
 
     <div id="aba-mapa" class="aba-view" style="display: block;">
@@ -74,7 +74,7 @@
                 <label class="check-item"><input type="checkbox" id="p-cp"> PALIATIVO</label>
                 <label class="check-item"><input type="checkbox" id="p-cf"> CONFERÊNCIA</label>
                 <label class="check-item"><input type="checkbox" id="p-poi"> POI</label>
-                <label class="check-item"><input type="checkbox" id="p-alta"> ALTA (Ativar para aba Altas)</label>
+                <label class="check-item"><input type="checkbox" id="p-alta"> ALTA</label>
             </div>
 
             <label>Lista de Problemas:</label>
@@ -86,10 +86,10 @@
             <label>Manejo e Conduta Psicológica:</label>
             <textarea id="p-cond" rows="4"></textarea>
             <label>Fechamento de Alta / Conduta de Saída:</label>
-            <textarea id="p-fech-alta" rows="2" placeholder="O que foi feito no encerramento / passagem para enfermaria..."></textarea>
+            <textarea id="p-fech-alta" rows="2"></textarea>
             <label>Informações do Boletim:</label>
             <textarea id="p-bol" rows="2"></textarea>
-            <label>📌 Pendências Específicas:</label>
+            <label>📌 Pendências:</label>
             <div class="check-grid">
                 <label class="check-item"><input type="checkbox" id="pen-f"> Falar Família</label>
                 <label class="check-item"><input type="checkbox" id="pen-b"> Boletim</label>
@@ -97,20 +97,20 @@
                 <label class="check-item"><input type="checkbox" id="pen-vi"> V. Infantil</label>
                 <label class="check-item"><input type="checkbox" id="pen-ve"> V. Estendida</label>
             </div>
-            <textarea id="p-obs" rows="2" placeholder="Outras pendências..."></textarea>
+            <textarea id="p-obs" rows="2" placeholder="Outras..."></textarea>
             <button onclick="salvar()">💾 SALVAR DADOS</button>
         </div>
     </div>
 
     <div id="aba-bol" class="aba-view"><h3>📢 Boletins</h3><div id="lista-bol"></div></div>
     <div id="aba-pen" class="aba-view"><h3>📌 Pendências</h3><div id="lista-pen"></div></div>
-    <div id="aba-alt" class="aba-view"><h3>🚪 Previsão de Altas</h3><div id="lista-alt"></div></div>
-    <div id="aba-pas" class="aba-view"><h3>📋 Relatório de Passagem de Plantão</h3><div id="tab-pas"></div></div>
+    <div id="aba-alt" class="aba-view"><h3>🚪 Altas</h3><div id="lista-alt"></div></div>
+    <div id="aba-pas" class="aba-view"><h3 id="titulo-impressao">DESCRIÇÃO DO PLANTÃO</h3><div id="tab-pas"></div></div>
 </div>
 
 <script>
     const unds = { "UCV 1": ["1","2","3","4","5","6","7"], "UCV 2": ["10","11","12","13","14","15","16","17","40","41"], "UCV 3": ["18","19","20","21","22","23","24","25","26","27","28","29","30","31","32"], "UCV 4": ["33","34","35","36","37","38","39"] };
-    let db = JSON.parse(localStorage.getItem('psi_v12_final')) || {};
+    let db = JSON.parse(localStorage.getItem('psi_v2026_final')) || {};
     let foco = null;
 
     function logar() {
@@ -179,9 +179,10 @@
             pf: document.getElementById('pen-f').checked, pb: document.getElementById('pen-b').checked,
             pc: document.getElementById('pen-c').checked, pvi: document.getElementById('pen-vi').checked, pve: document.getElementById('pen-ve').checked
         };
-        localStorage.setItem('psi_v12_final', JSON.stringify(db));
+        localStorage.setItem('psi_v2026_final', JSON.stringify(db));
         document.getElementById('editor').style.display = 'none';
         renderMapa();
+        alert("Salvo!");
     }
 
     function switchTab(t) {
@@ -195,12 +196,13 @@
     }
 
     function renderPassagem() {
+        const u = document.getElementById('sel-uti').value;
+        document.getElementById('titulo-impressao').innerText = `DESCRIÇÃO DO PLANTÃO - ${u}`;
         let h = '<table><tr><th style="width:5%">L</th><th style="width:20%">Paciente / Problemas</th><th style="width:10%">Clínica</th><th style="width:25%">Evolução Clínica</th><th style="width:20%">Exame Psíquico</th><th style="width:20%">Conduta / Alta</th></tr>';
         for(let l in db) if(db[l].n) {
             let cl = []; if(db[l].vm) cl.push("VM"); if(db[l].esp) cl.push("ESP"); if(db[l].del) cl.push("DEL"); if(db[l].cp) cl.push("CP"); if(db[l].iso) cl.push("ISO");
-            let condutaFinal = db[l].c;
-            if(db[l].fech) condutaFinal += `<br>---<br><b>FECHAMENTO ALTA:</b> ${db[l].fech}`;
-            h += `<tr><td><b>${l}</b></td><td><b>${db[l].n}</b><br><small>${db[l].prob}</small></td><td>${cl.join(', ')}</td><td>${db[l].h}</td><td>${db[l].psiq}</td><td>${condutaFinal}</td></tr>`;
+            let cFinal = db[l].c; if(db[l].fech) cFinal += `<br>---<br><b>ALTA:</b> ${db[l].fech}`;
+            h += `<tr><td><b>${l}</b></td><td><b>${db[l].n}</b><br><small>${db[l].prob}</small></td><td>${cl.join(', ')}</td><td>${db[l].h}</td><td>${db[l].psiq}</td><td>${cFinal}</td></tr>`;
         }
         document.getElementById('tab-pas').innerHTML = h + '</table>';
     }
